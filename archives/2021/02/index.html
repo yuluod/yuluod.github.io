@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="robots" content="noindex"><meta><title>Archives: 2021/2 - iyuluo</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="iyuluo"><meta name="msapplication-TileImage" content="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="iyuluo"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta property="og:type" content="blog"><meta property="og:title" content="iyuluo"><meta property="og:url" content="http://example.com/"><meta property="og:site_name" content="iyuluo"><meta property="og:locale" content="en_US"><meta property="og:image" content="http://example.com/img/og_image.png"><meta property="article:author" content="John Doe"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://example.com/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com"},"headline":"iyuluo","image":["http://example.com/img/og_image.png"],"author":{"@type":"Person","name":"John Doe"},"publisher":{"@type":"Organization","name":"iyuluo","logo":{"@type":"ImageObject","url":"http://example.com/img/blog.svg"}},"description":""}</script><link rel="icon" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/androidstudio.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><script>var _hmt = _hmt || [];
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="robots" content="noindex"><meta><title>Archives: 2021/2 - iyuluo</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="iyuluo"><meta name="msapplication-TileImage" content="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="iyuluo"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta property="og:type" content="blog"><meta property="og:title" content="iyuluo"><meta property="og:url" content="http://example.com/"><meta property="og:site_name" content="iyuluo"><meta property="og:locale" content="en_US"><meta property="og:image" content="http://example.com/img/og_image.png"><meta property="article:author" content="John Doe"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://example.com/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com"},"headline":"iyuluo","image":["http://example.com/img/og_image.png"],"author":{"@type":"Person","name":"John Doe"},"publisher":{"@type":"Organization","name":"iyuluo","logo":{"@type":"ImageObject","url":"http://example.com/img/blog.svg"}},"description":""}</script><link rel="icon" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/androidstudio.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><script>var _hmt = _hmt || [];
         (function() {
             var hm = document.createElement("script");
             hm.src = "//hm.baidu.com/hm.js?e2e61cddcd9eb21dc563c9a63bcc50fd";
@@ -15,23 +15,24 @@
           if (!location.hash) {
             return;
           }
-          Array
-              .from(document.querySelectorAll('.tab-content'))
-              .forEach($tab => {
-                  $tab.classList.add('is-hidden');
-              });
-          Array
-              .from(document.querySelectorAll('.tabs li'))
-              .forEach($tab => {
-                  $tab.classList.remove('is-active');
-              });
+
+          const $tabMenu = document.querySelector(`a[href="${location.hash}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
           const $activeTab = document.querySelector(location.hash);
           if ($activeTab) {
               $activeTab.classList.remove('is-hidden');
-          }
-          const $tabMenu = document.querySelector(`a[href="${location.hash}"]`);
-          if ($tabMenu) {
-              $tabMenu.parentElement.classList.add('is-active');
           }
       }
       switchTab();
