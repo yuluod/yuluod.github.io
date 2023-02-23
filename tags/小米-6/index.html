@@ -16,7 +16,8 @@
             return;
           }
 
-          const $tabMenu = document.querySelector(`a[href="${location.hash}"]`);
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
           if (!$tabMenu) {
             return;
           }
@@ -30,7 +31,7 @@
           if ($tabMenu) {
               $tabMenu.parentElement.classList.add('is-active');
           }
-          const $activeTab = document.querySelector(location.hash);
+          const $activeTab = document.querySelector(id);
           if ($activeTab) {
               $activeTab.classList.remove('is-hidden');
           }
@@ -38,7 +39,7 @@
       switchTab();
       window.addEventListener('hashchange', switchTab, false);
   })();
-  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.0.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/blog.svg" alt="iyuluo" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="Search" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-content"><nav class="breadcrumb" aria-label="breadcrumbs"><ul><li><a href="/tags">Tags</a></li><li class="is-active"><a href="#" aria-current="page">小米 6</a></li></ul></nav></div></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2019-10-23T08:45:13.000Z" title="10/23/2019, 4:45:13 PM">2019-10-23</time></span><span class="level-item">Updated&nbsp;<time dateTime="2019-12-25T07:15:18.000Z" title="12/25/2019, 3:15:18 PM">2019-12-25</time></span><span class="level-item"><a class="link-muted" href="/categories/Android/">Android</a></span><span class="level-item">2 minutes read (About 299 words)</span></div></div><h1 class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2019/10/23/%E5%B0%8F%E7%B1%B36-%E5%88%B7%E6%9C%BA%E8%AE%B0%E5%BD%95/">小米6 刷机记录</a></h1><div class="content"><h3 id="小米6刷机记录"><a href="#小米6刷机记录" class="headerlink" title="小米6刷机记录"></a>小米6刷机记录</h3><ul>
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.0.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/blog.svg" alt="iyuluo" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="Search" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-content"><nav class="breadcrumb" aria-label="breadcrumbs"><ul><li><a href="/tags">Tags</a></li><li class="is-active"><a href="#" aria-current="page">小米 6</a></li></ul></nav></div></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2019-10-23T08:45:13.000Z" title="10/23/2019, 4:45:13 PM">2019-10-23</time></span><span class="level-item">Updated&nbsp;<time dateTime="2019-12-25T07:15:18.000Z" title="12/25/2019, 3:15:18 PM">2019-12-25</time></span><span class="level-item"><a class="link-muted" href="/categories/Android/">Android</a></span><span class="level-item">2 minutes read (About 299 words)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2019/10/23/%E5%B0%8F%E7%B1%B36-%E5%88%B7%E6%9C%BA%E8%AE%B0%E5%BD%95/">小米6 刷机记录</a></p><div class="content"><h3 id="小米6刷机记录"><a href="#小米6刷机记录" class="headerlink" title="小米6刷机记录"></a>小米6刷机记录</h3><ul>
 <li>adb/fastboot工具：Minimal ADB and Fastboot</li>
 <li>刷之前的MIUI为：MIUI的稳定版</li>
 <li>TWRP：官网上小米6的3.2.1</li>

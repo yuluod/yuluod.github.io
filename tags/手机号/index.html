@@ -16,7 +16,8 @@
             return;
           }
 
-          const $tabMenu = document.querySelector(`a[href="${location.hash}"]`);
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
           if (!$tabMenu) {
             return;
           }
@@ -30,7 +31,7 @@
           if ($tabMenu) {
               $tabMenu.parentElement.classList.add('is-active');
           }
-          const $activeTab = document.querySelector(location.hash);
+          const $activeTab = document.querySelector(id);
           if ($activeTab) {
               $activeTab.classList.remove('is-hidden');
           }
@@ -38,7 +39,7 @@
       switchTab();
       window.addEventListener('hashchange', switchTab, false);
   })();
-  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.0.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/blog.svg" alt="iyuluo" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="Search" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-content"><nav class="breadcrumb" aria-label="breadcrumbs"><ul><li><a href="/tags">Tags</a></li><li class="is-active"><a href="#" aria-current="page">手机号</a></li></ul></nav></div></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2022-04-26T08:25:00.000Z" title="4/26/2022, 4:25:00 PM">2022-04-26</time></span><span class="level-item">Updated&nbsp;<time dateTime="2022-04-26T08:31:38.663Z" title="4/26/2022, 4:31:38 PM">2022-04-26</time></span><span class="level-item"><a class="link-muted" href="/categories/Regex/">Regex</a></span><span class="level-item">3 minutes read (About 389 words)</span></div></div><h1 class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2022/04/26/%E9%83%A8%E5%88%86%E5%9B%BD%E5%AE%B6%E5%92%8C%E5%9C%B0%E5%8C%BA%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%AD%A3%E5%88%99%E5%8C%B9%E9%85%8D%E8%A1%A8%E8%BE%BE%E5%BC%8F/">部分国家和地区的手机号正则匹配表达式</a></h1><div class="content"><p>以下是一些国家的代号以及这些这国家的手机号的匹配正则</p>
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.0.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/blog.svg" alt="iyuluo" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="Search" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-content"><nav class="breadcrumb" aria-label="breadcrumbs"><ul><li><a href="/tags">Tags</a></li><li class="is-active"><a href="#" aria-current="page">手机号</a></li></ul></nav></div></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2022-04-26T08:25:00.000Z" title="4/26/2022, 4:25:00 PM">2022-04-26</time></span><span class="level-item">Updated&nbsp;<time dateTime="2022-04-26T08:31:38.663Z" title="4/26/2022, 4:31:38 PM">2022-04-26</time></span><span class="level-item"><a class="link-muted" href="/categories/Regex/">Regex</a></span><span class="level-item">3 minutes read (About 389 words)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2022/04/26/%E9%83%A8%E5%88%86%E5%9B%BD%E5%AE%B6%E5%92%8C%E5%9C%B0%E5%8C%BA%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%AD%A3%E5%88%99%E5%8C%B9%E9%85%8D%E8%A1%A8%E8%BE%BE%E5%BC%8F/">部分国家和地区的手机号正则匹配表达式</a></p><div class="content"><p>以下是一些国家的代号以及这些这国家的手机号的匹配正则</p>
 <table>
 <thead>
 <tr>
