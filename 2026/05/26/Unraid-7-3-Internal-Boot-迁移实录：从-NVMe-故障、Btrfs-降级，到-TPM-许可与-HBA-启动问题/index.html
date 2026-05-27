@@ -1,45 +1,533 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题 - iyuluo</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="iyuluo"><meta name="msapplication-TileImage" content="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="iyuluo"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="一、背景最近在折腾 Unraid 7.3 的 Internal Boot，也就是从传统 USB 启动迁移到内部 SSD 启动。 原本的目标很简单：  用一块企业级 SATA SSD 替代 U 盘，作为 Unraid 的内部启动盘，提高稳定性。  但实际迁移过程中，顺带暴露出了一堆隐藏问题：  Cache Pool 中一块 NVMe 已经出现真实介质错误； Btrfs RAID1 虽然能自修复，但并"><meta property="og:type" content="blog"><meta property="og:title" content="Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题"><meta property="og:url" content="http://example.com/2026/05/26/Unraid-7-3-Internal-Boot-%E8%BF%81%E7%A7%BB%E5%AE%9E%E5%BD%95%EF%BC%9A%E4%BB%8E-NVMe-%E6%95%85%E9%9A%9C%E3%80%81Btrfs-%E9%99%8D%E7%BA%A7%EF%BC%8C%E5%88%B0-TPM-%E8%AE%B8%E5%8F%AF%E4%B8%8E-HBA-%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98/"><meta property="og:site_name" content="iyuluo"><meta property="og:description" content="一、背景最近在折腾 Unraid 7.3 的 Internal Boot，也就是从传统 USB 启动迁移到内部 SSD 启动。 原本的目标很简单：  用一块企业级 SATA SSD 替代 U 盘，作为 Unraid 的内部启动盘，提高稳定性。  但实际迁移过程中，顺带暴露出了一堆隐藏问题：  Cache Pool 中一块 NVMe 已经出现真实介质错误； Btrfs RAID1 虽然能自修复，但并"><meta property="og:locale" content="en_US"><meta property="og:image" content="http://example.com/img/og_image.png"><meta property="article:published_time" content="2026-05-26T15:18:17.000Z"><meta property="article:modified_time" content="2026-05-26T15:32:02.671Z"><meta property="article:author" content="John Doe"><meta property="article:tag" content="UNRAID"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://example.com/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2026/05/26/Unraid-7-3-Internal-Boot-%E8%BF%81%E7%A7%BB%E5%AE%9E%E5%BD%95%EF%BC%9A%E4%BB%8E-NVMe-%E6%95%85%E9%9A%9C%E3%80%81Btrfs-%E9%99%8D%E7%BA%A7%EF%BC%8C%E5%88%B0-TPM-%E8%AE%B8%E5%8F%AF%E4%B8%8E-HBA-%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98/"},"headline":"Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题","image":["http://example.com/img/og_image.png"],"datePublished":"2026-05-26T15:18:17.000Z","dateModified":"2026-05-26T15:32:02.671Z","author":{"@type":"Person","name":"John Doe"},"publisher":{"@type":"Organization","name":"iyuluo","logo":{"@type":"ImageObject","url":"http://example.com/img/blog.svg"}},"description":"一、背景最近在折腾 Unraid 7.3 的 Internal Boot，也就是从传统 USB 启动迁移到内部 SSD 启动。 原本的目标很简单：  用一块企业级 SATA SSD 替代 U 盘，作为 Unraid 的内部启动盘，提高稳定性。  但实际迁移过程中，顺带暴露出了一堆隐藏问题：  Cache Pool 中一块 NVMe 已经出现真实介质错误； Btrfs RAID1 虽然能自修复，但并"}</script><link rel="canonical" href="http://example.com/2026/05/26/Unraid-7-3-Internal-Boot-%E8%BF%81%E7%A7%BB%E5%AE%9E%E5%BD%95%EF%BC%9A%E4%BB%8E-NVMe-%E6%95%85%E9%9A%9C%E3%80%81Btrfs-%E9%99%8D%E7%BA%A7%EF%BC%8C%E5%88%B0-TPM-%E8%AE%B8%E5%8F%AF%E4%B8%8E-HBA-%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98/"><link rel="icon" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link data-pjax rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/androidstudio.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link data-pjax rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><script>var _hmt = _hmt || [];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Python, Linux, macOS, Android, Git, Hexo, 技术博客, 开发笔记">
+    
+    
+    <meta name="author" content="yuluo">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
         (function() {
-            var hm = document.createElement("script");
-            hm.src = "//hm.baidu.com/hm.js?e2e61cddcd9eb21dc563c9a63bcc50fd";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();</script><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><script src="https://www.googletagmanager.com/gtag/js?id=UA-154977104-1" async></script><script>window.dataLayer = window.dataLayer || [];
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://yuluod.github.io/2026/05/26/unraid-7-3-internal-boot-迁移实录：从-nvme-故障、btrfs-降级，到-tpm-许可与-hba-启动问题/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="记录Python、Linux、macOS、Android、Git等技术笔记与开发实践">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题">
+<meta property="og:url" content="https://yuluod.github.io/2026/05/26/Unraid-7-3-Internal-Boot-%E8%BF%81%E7%A7%BB%E5%AE%9E%E5%BD%95%EF%BC%9A%E4%BB%8E-NVMe-%E6%95%85%E9%9A%9C%E3%80%81Btrfs-%E9%99%8D%E7%BA%A7%EF%BC%8C%E5%88%B0-TPM-%E8%AE%B8%E5%8F%AF%E4%B8%8E-HBA-%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="雨落杂记">
+<meta property="og:description" content="记录Python、Linux、macOS、Android、Git等技术笔记与开发实践">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://yuluod.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-05-26T15:18:17.000Z">
+<meta property="article:modified_time" content="2026-05-26T15:32:02.671Z">
+<meta property="article:author" content="yuluo">
+<meta property="article:tag" content="UNRAID">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yuluod.github.io/images/redefine-og.webp">
+    
+    
+        <!-- Google tag (gtag.js) -->
+        <script src="https://www.googletagmanager.com/gtag/js?id=UA-154977104-1"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
+
+        gtag('config', 'UA-154977104-1');
+        </script>
     
-        gtag('config', 'UA-154977104-1');</script><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css"><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
-  (function () {
-      function switchTab() {
-          if (!location.hash) {
-            return;
-          }
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题 | 雨落杂记
+        
+    </title>
 
-          const id = '#' + CSS.escape(location.hash.substring(1));
-          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
-          if (!$tabMenu) {
-            return;
-          }
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
 
-          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
-          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
-          Array.from($tabMenuContainer.querySelectorAll('a'))
-              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
-              .forEach($content => $content.classList.add('is-hidden'));
 
-          if ($tabMenu) {
-              $tabMenu.parentElement.classList.add('is-active');
-          }
-          const $activeTab = document.querySelector(id);
-          if ($activeTab) {
-              $activeTab.classList.remove('is-hidden');
-          }
-      }
-      switchTab();
-      window.addEventListener('hashchange', switchTab, false);
-  })();
-  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.1.1"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/blog.svg" alt="iyuluo" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="Catalogue" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="Search" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2026-05-26T15:18:17.000Z" title="5/26/2026, 11:18:17 PM">2026-05-26</time></span><span class="level-item">Updated&nbsp;<time dateTime="2026-05-26T15:32:02.671Z" title="5/26/2026, 11:32:02 PM">2026-05-26</time></span><span class="level-item"><a class="link-muted" href="/categories/NAS/">NAS</a></span><span class="level-item">28 minutes read (About 4254 words)</span></div></div><h1 class="title is-3 is-size-4-mobile">Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题</h1><div class="content"><h2 id="一、背景"><a href="#一、背景" class="headerlink" title="一、背景"></a>一、背景</h2><p>最近在折腾 Unraid 7.3 的 Internal Boot，也就是从传统 USB 启动迁移到内部 SSD 启动。</p>
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"yuluod.github.io","root":"/","language":"en","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"auto"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"记录Python、Linux、macOS、Android、Git等技术笔记与开发实践"},"google_analytics":{"enable":true,"id":"UA-154977104-1"}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpeg","dark":"/images/banner-light.jpeg"},"title":"雨落杂记","subtitle":{"text":["写点东西"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#333","dark":"#eee"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/yuluod"},{"icon":"fa-brands fa-rss","url":"/atom.xml"},{"icon":"fa-solid fa-at","url":"you@example.com"},{"icon":"fa-brands fa-telegram","url":null},{"icon":"/images/custom-icon.svg","url":null}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"}},"navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"cloud","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #f54545\"></i>","start":"2022/8/17 11:45:14","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null},"style":"blend","copyright":{"enable":true,"since":2015,"custom":null},"social_links":{"copyright":{"Github":{"icon":"fa-brands fa-github","url":"https://github.com/yuluod"},"RSS":{"icon":"fa-solid fa-rss","url":"/atom.xml"}}}},"footerStart":"2022/8/17 11:45:14","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
+    window.i18n = {"search":"Search...","toc":"On this page","prev":"Prev","next":"Next","prev_posts":"Prev posts","next_posts":"Next posts","page":"Page %d","recent_posts":"Recent Posts","share":"Share","powered_by":"POWERED BY %s","theme":"THEME","rss_feed":"RSS Feed","category":"Category","categories":"Categories","tag":"Tag","tags":"Tags","post":"Post","posts":"Posts","tagcloud":"Tag Cloud","comment":"Comment","comments":"Comments","home":"Home","archive":"Archive","archives":"Archives","top":"TOP","sticky":"Sticky","go-back-home":"Go Back Home","masonry_loading":"Loading photos...","image_viewer":"Image viewer","close":"Close","exif":{"title":"EXIF","cards":{"camera":"Camera","lens":"Lens","exposure":"Exposure","other":"Other"},"fields":{"make":"Brand","model":"Model","date_taken":"Date taken","lens_model":"Lens","focal_length":"Focal length","focus_mode":"Focus mode","shutter":"Shutter","aperture":"Aperture","iso":"ISO","exposure_program":"Exposure program","exposure_compensation":"Exposure compensation","metering_mode":"Metering mode","flash":"Flash","white_balance":"White balance","latitude":"Latitude","longitude":"Longitude","altitude":"Altitude"},"status":{"loading":"Loading...","no_exif":"No EXIF available","library_missing":"EXIF library not loaded","image_source_missing":"Image source unavailable","unavailable":"EXIF unavailable (blocked by CORS or missing metadata)","flag_unavailable":"EXIF unavailable"}},"about":"About","changelog":"Changelog","links":"Links","link":"Link","friends":"Friends","friend":"Friend","timeline":"Timeline","shuoshuo":"Shuoshuo","bookmarks":"Bookmarks","site_uv":"VISITOR COUNT","site_pv":"TOTAL PAGE VIEWS","read_more":"Read more","wordcount":"Words","min2read":"Mins","status":"Status","runtime":"Blog up for","days":"days","hours":"hrs","minutes":"Min","seconds":"Sec","optimized_by":"and Optimized by Evan","rights":"All Rights Reserved","site_posts":"%s posts in total","site_wordcount":"%s words in total","copyright":{"author":"Author","title":"Title","link":"Link","create_time":"Created at","update_time":"Updated at","license_title":"License","license_content":"This work is licensed under %s.","all_rights_reserved":"All Rights Reserved &#169; %s","public_domain":"This work is in the public domain."},"ago":{"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"},"create_time":"Created","update_time":"Updated","expired":"This post is written %s days ago, and the content may not be up to date."};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="雨落杂记" type="application/atom+xml">
+</head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+                <a class="logo-image h-8 w-8 sm:w-10 sm:h-10 mr-3" href="/">
+                    <img src="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg" class="w-full h-full rounded-xs">
+                </a>
+            
+            <a class="logo-title" href="/">
+                
+                雨落杂记
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    HOME
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    ARCHIVES
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    TAGS
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    ABOUT
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                HOME
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                ARCHIVES
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                TAGS
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                ABOUT
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/categories"
+                        >
+                            <span>Categories</span>
+                            <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">68</div>
+        <div class="label text-third-text-color text-sm">Tags</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">26</div>
+        <div class="label text-third-text-color text-sm">Categories</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">234</div>
+        <div class="label text-third-text-color text-sm">Posts</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">yuluo</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-05-26 23:18:17</span>
+        <span class="mobile">2026-05-26 23:18:17</span>
+        <span class="hover-info">Created</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-05-26 23:32:02</span>
+            <span class="mobile">2026-05-26 23:32:02</span>
+            <span class="hover-info">Updated</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/NAS/">NAS</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/UNRAID/">UNRAID</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<h2 id="一、背景"><a href="#一、背景" class="headerlink" title="一、背景"></a>一、背景</h2><p>最近在折腾 Unraid 7.3 的 Internal Boot，也就是从传统 USB 启动迁移到内部 SSD 启动。</p>
 <p>原本的目标很简单：</p>
 <blockquote>
 <p>用一块企业级 SATA SSD 替代 U 盘，作为 Unraid 的内部启动盘，提高稳定性。</p>
@@ -98,13 +586,13 @@
 </tbody></table>
 <hr>
 <h2 id="三、第一次发现问题：Btrfs-scrub-报错但可修复"><a href="#三、第一次发现问题：Btrfs-scrub-报错但可修复" class="headerlink" title="三、第一次发现问题：Btrfs scrub 报错但可修复"></a>三、第一次发现问题：Btrfs scrub 报错但可修复</h2><p>一开始执行 cache pool 的 Btrfs scrub：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs scrub start -B /mnt/cache</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs scrub start -B /mnt/cache</span><br></pre></td></tr></table></figure></div>
 
 <p>第一次结果出现大量错误：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Error summary: read=256 verify=20 csum=2937</span><br><span class="line">Corrected: 3213</span><br><span class="line">Uncorrectable: 0</span><br><span class="line">Unverified: 0</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Error summary: read=256 verify=20 csum=2937</span><br><span class="line">Corrected: 3213</span><br><span class="line">Uncorrectable: 0</span><br><span class="line">Unverified: 0</span><br></pre></td></tr></table></figure></div>
 
 <p>第二次 scrub 又变成：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error summary: no errors found</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error summary: no errors found</span><br></pre></td></tr></table></figure></div>
 
 <p>表面看似没问题，因为：</p>
 <ul>
@@ -119,31 +607,31 @@
 <p>这不代表故障盘健康。</p>
 <hr>
 <h2 id="四、真正的硬盘故障证据：device-stats-和-dmesg"><a href="#四、真正的硬盘故障证据：device-stats-和-dmesg" class="headerlink" title="四、真正的硬盘故障证据：device stats 和 dmesg"></a>四、真正的硬盘故障证据：device stats 和 dmesg</h2><p>继续查看 Btrfs device stats：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs device stats /mnt/cache</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs device stats /mnt/cache</span><br></pre></td></tr></table></figure></div>
 
 <p>结果非常明显：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[/dev/nvme1n1p1].write_io_errs    29513266</span><br><span class="line">[/dev/nvme1n1p1].read_io_errs     88468</span><br><span class="line">[/dev/nvme1n1p1].flush_io_errs    1244217</span><br><span class="line">[/dev/nvme1n1p1].corruption_errs  38172</span><br><span class="line">[/dev/nvme1n1p1].generation_errs  5</span><br><span class="line"></span><br><span class="line">[/dev/nvme0n1p1].write_io_errs    0</span><br><span class="line">[/dev/nvme0n1p1].read_io_errs     0</span><br><span class="line">[/dev/nvme0n1p1].flush_io_errs    0</span><br><span class="line">[/dev/nvme0n1p1].corruption_errs  0</span><br><span class="line">[/dev/nvme0n1p1].generation_errs  0</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[/dev/nvme1n1p1].write_io_errs    29513266</span><br><span class="line">[/dev/nvme1n1p1].read_io_errs     88468</span><br><span class="line">[/dev/nvme1n1p1].flush_io_errs    1244217</span><br><span class="line">[/dev/nvme1n1p1].corruption_errs  38172</span><br><span class="line">[/dev/nvme1n1p1].generation_errs  5</span><br><span class="line"></span><br><span class="line">[/dev/nvme0n1p1].write_io_errs    0</span><br><span class="line">[/dev/nvme0n1p1].read_io_errs     0</span><br><span class="line">[/dev/nvme0n1p1].flush_io_errs    0</span><br><span class="line">[/dev/nvme0n1p1].corruption_errs  0</span><br><span class="line">[/dev/nvme0n1p1].generation_errs  0</span><br></pre></td></tr></table></figure></div>
 
 <p>可以确认：</p>
 <blockquote>
 <p><code>/dev/nvme1n1p1</code> 是故障盘，<code>/dev/nvme0n1p1</code> 是健康盘。</p>
 </blockquote>
 <p>再看 dmesg：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dmesg | grep -i nvme</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dmesg | grep -i nvme</span><br></pre></td></tr></table></figure></div>
 
 <p>其中出现了关键错误：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">critical medium error, dev nvme1n1</span><br><span class="line">I/O Error (sct 0x2 / sc 0x81)</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">critical medium error, dev nvme1n1</span><br><span class="line">I/O Error (sct 0x2 / sc 0x81)</span><br></pre></td></tr></table></figure></div>
 
 <p>这类错误已经不是 APST、省电、驱动、PCIe reset 之类的问题，而是典型的：</p>
 <blockquote>
 <p>SSD 介质 &#x2F; 数据完整性错误。</p>
 </blockquote>
 <p>即使 Windows 下 SMART 显示“健康”，只要出现：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Media and Data Integrity Errors &gt; 0</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Media and Data Integrity Errors &gt; 0</span><br></pre></td></tr></table></figure></div>
 
 <p>就不能再把它当作可靠盘使用。</p>
 <p>这块故障 NVMe 后续拆下来重新查看，SMART 中也能看到：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Media and Data Integrity Errors = 36</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Media and Data Integrity Errors = 36</span><br></pre></td></tr></table></figure></div>
 
 <p>这个值正常应该是 0。</p>
 <hr>
@@ -152,7 +640,7 @@
 <p>Windows 工具显示“健康”不代表盘真的适合继续做 NAS cache。</p>
 </blockquote>
 <p>很多 SMART 工具主要看：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Critical Warning</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Critical Warning</span><br></pre></td></tr></table></figure></div>
 
 <p>只要它是 0，就显示“健康”。</p>
 <p>但对 NAS &#x2F; Btrfs &#x2F; ZFS 来说，更重要的是：</p>
@@ -198,10 +686,10 @@
 <hr>
 <h2 id="六、512G-替换-1T-cache-盘为什么失败？"><a href="#六、512G-替换-1T-cache-盘为什么失败？" class="headerlink" title="六、512G 替换 1T cache 盘为什么失败？"></a>六、512G 替换 1T cache 盘为什么失败？</h2><p>手边刚好有一块 512G NVMe，于是想直接替换故障的 1T 1T NVMe。</p>
 <p>一开始查看：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs filesystem show</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs filesystem show</span><br></pre></td></tr></table></figure></div>
 
 <p>看到 cache pool：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Total devices 2 FS bytes used 372.30GiB</span><br><span class="line">devid 1 size 953.87GiB used 375.03GiB path /dev/nvme1n1p1</span><br><span class="line">devid 2 size 953.87GiB used 375.03GiB path /dev/nvme0n1p1</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Total devices 2 FS bytes used 372.30GiB</span><br><span class="line">devid 1 size 953.87GiB used 375.03GiB path /dev/nvme1n1p1</span><br><span class="line">devid 2 size 953.87GiB used 375.03GiB path /dev/nvme0n1p1</span><br></pre></td></tr></table></figure></div>
 
 <p>这里有一个关键点：</p>
 <blockquote>
@@ -209,31 +697,31 @@
 </blockquote>
 <p>理论上 512G 应该够。</p>
 <p>但在 Unraid GUI 或 Btrfs replace 时提示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wrong pool state</span><br><span class="line">replace device too small</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wrong pool state</span><br><span class="line">replace device too small</span><br></pre></td></tr></table></figure></div>
 
 <p>原因在于：</p>
 <blockquote>
 <p>Btrfs replace 看的不只是实际 used，还会受到 allocated chunk 的影响。</p>
 </blockquote>
 <p>也就是说，Btrfs 可能只用了 372G 数据，但已经分配了更大的 chunk。此前 usage 中曾看到：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Device allocated: 741.06GiB</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Device allocated: 741.06GiB</span><br></pre></td></tr></table></figure></div>
 
 <p>所以直接用 512G 替换会失败。</p>
 <hr>
 <h2 id="七、解决办法：先降级为单盘，再清理-RAID1-allocation"><a href="#七、解决办法：先降级为单盘，再清理-RAID1-allocation" class="headerlink" title="七、解决办法：先降级为单盘，再清理 RAID1 allocation"></a>七、解决办法：先降级为单盘，再清理 RAID1 allocation</h2><p>拆掉故障盘后，Btrfs pool 进入 degraded 状态：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs filesystem show</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs filesystem show</span><br></pre></td></tr></table></figure></div>
 
 <p>显示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">warning, device 1 is missing</span><br><span class="line"></span><br><span class="line">Label: none uuid: 1d44c14b...</span><br><span class="line">Total devices 2 FS bytes used 372.28GiB</span><br><span class="line">devid 2 size 953.87GiB used 375.03GiB path /dev/nvme0n1p1</span><br><span class="line">*** Some devices missing</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">warning, device 1 is missing</span><br><span class="line"></span><br><span class="line">Label: none uuid: 1d44c14b...</span><br><span class="line">Total devices 2 FS bytes used 372.28GiB</span><br><span class="line">devid 2 size 953.87GiB used 375.03GiB path /dev/nvme0n1p1</span><br><span class="line">*** Some devices missing</span><br></pre></td></tr></table></figure></div>
 
 <p>此时需要先手动 degraded mount：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /mnt/recovery</span><br><span class="line">mount -o degraded /dev/nvme0n1p1 /mnt/recovery</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /mnt/recovery</span><br><span class="line">mount -o degraded /dev/nvme0n1p1 /mnt/recovery</span><br></pre></td></tr></table></figure></div>
 
 <p>确认数据还能看到后，开始 balance，把 RAID1 profile 转成 single：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs balance start -dconvert=single -mconvert=dup /mnt/cache</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs balance start -dconvert=single -mconvert=dup /mnt/cache</span><br></pre></td></tr></table></figure></div>
 
 <p>最终状态变成：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pool status: ONLINE</span><br><span class="line">Device size: 953.87GiB</span><br><span class="line">Device allocated: 379.06GiB</span><br><span class="line">Used: 373.54GiB</span><br><span class="line">Data ratio: 1.00</span><br><span class="line">Metadata ratio: 2.00</span><br><span class="line">Multiple profiles: no</span><br><span class="line"></span><br><span class="line">Data single</span><br><span class="line">Metadata DUP</span><br><span class="line">System DUP</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pool status: ONLINE</span><br><span class="line">Device size: 953.87GiB</span><br><span class="line">Device allocated: 379.06GiB</span><br><span class="line">Used: 373.54GiB</span><br><span class="line">Data ratio: 1.00</span><br><span class="line">Metadata ratio: 2.00</span><br><span class="line">Multiple profiles: no</span><br><span class="line"></span><br><span class="line">Data single</span><br><span class="line">Metadata DUP</span><br><span class="line">System DUP</span><br></pre></td></tr></table></figure></div>
 
 <p>这说明：</p>
 <ul>
@@ -285,7 +773,7 @@
 <li>后续计划等 SSD 价格回落后，换 1T 企业 SATA &#x2F; 企业 NVMe 更合适。</li>
 </ol>
 <p>如果后面要重新加回 512G RAID1，可以在 GUI 中把 512G 加入 pool，然后执行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs balance start -dconvert=raid1 -mconvert=raid1 /mnt/cache</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">btrfs balance start -dconvert=raid1 -mconvert=raid1 /mnt/cache</span><br></pre></td></tr></table></figure></div>
 
 <p>但当前更稳妥的是：</p>
 <blockquote>
@@ -293,10 +781,10 @@
 </blockquote>
 <hr>
 <h2 id="九、240G-S4610-做-Internal-Boot-是否合适？"><a href="#九、240G-S4610-做-Internal-Boot-是否合适？" class="headerlink" title="九、240G S4610 做 Internal Boot 是否合适？"></a>九、240G S4610 做 Internal Boot 是否合适？</h2><p>这次准备作为 Internal Boot 的盘是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;ENTERPRISE-SATA-SSD-MODEL-REDACTED&gt;</span><br><span class="line">240G 企业级 SATA SSD</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;ENTERPRISE-SATA-SSD-MODEL-REDACTED&gt;</span><br><span class="line">240G 企业级 SATA SSD</span><br></pre></td></tr></table></figure></div>
 
 <p>SMART 状态如下：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Reallocated sector count = 0</span><br><span class="line">Current pending sector = 0</span><br><span class="line">Offline uncorrectable = 0</span><br><span class="line">CRC error count = 0</span><br><span class="line">Program fail count total = 0</span><br><span class="line">Erase fail count total = 0</span><br><span class="line">Percent life remaining = 100%</span><br><span class="line">Power on hours = 41479</span><br><span class="line">Temperature = 27℃</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Reallocated sector count = 0</span><br><span class="line">Current pending sector = 0</span><br><span class="line">Offline uncorrectable = 0</span><br><span class="line">CRC error count = 0</span><br><span class="line">Program fail count total = 0</span><br><span class="line">Erase fail count total = 0</span><br><span class="line">Percent life remaining = 100%</span><br><span class="line">Power on hours = 41479</span><br><span class="line">Temperature = 27℃</span><br></pre></td></tr></table></figure></div>
 
 <p>虽然通电时间已经 4.7 年，但对企业 SATA SSD 来说不算夸张。</p>
 <p>而且它的关键指标很干净：</p>
@@ -382,7 +870,7 @@
 </tbody></table>
 <hr>
 <h2 id="十一、Internal-Boot-写入成功，但拔-U-盘无法启动"><a href="#十一、Internal-Boot-写入成功，但拔-U-盘无法启动" class="headerlink" title="十一、Internal Boot 写入成功，但拔 U 盘无法启动"></a>十一、Internal Boot 写入成功，但拔 U 盘无法启动</h2><p>Internal Boot 创建成功后，<code>lsblk -f</code> 显示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sdc</span><br><span class="line">├─sdc1</span><br><span class="line">├─sdc2 vfat FAT32 EFI</span><br><span class="line">├─sdc3 zfs_member flash</span><br><span class="line">└─sdc4</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sdc</span><br><span class="line">├─sdc1</span><br><span class="line">├─sdc2 vfat FAT32 EFI</span><br><span class="line">├─sdc3 zfs_member flash</span><br><span class="line">└─sdc4</span><br></pre></td></tr></table></figure></div>
 
 <p>说明：</p>
 <ul>
@@ -391,17 +879,17 @@
 <li>Internal Boot 本身已经写入成功。</li>
 </ul>
 <p>进一步检查 EFI 文件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /mnt/bootssd</span><br><span class="line">mount /dev/sdc2 /mnt/bootssd</span><br><span class="line">find /mnt/bootssd</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /mnt/bootssd</span><br><span class="line">mount /dev/sdc2 /mnt/bootssd</span><br><span class="line">find /mnt/bootssd</span><br></pre></td></tr></table></figure></div>
 
 <p>输出：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/mnt/bootssd</span><br><span class="line">/mnt/bootssd/EFI</span><br><span class="line">/mnt/bootssd/EFI/BOOT</span><br><span class="line">/mnt/bootssd/EFI/BOOT/BOOTX64.EFI</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/mnt/bootssd</span><br><span class="line">/mnt/bootssd/EFI</span><br><span class="line">/mnt/bootssd/EFI/BOOT</span><br><span class="line">/mnt/bootssd/EFI/BOOT/BOOTX64.EFI</span><br></pre></td></tr></table></figure></div>
 
 <p>这说明 EFI fallback 文件也存在。</p>
 <p>然后通过 <code>efibootmgr</code> 手动创建 EFI 启动项：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">efibootmgr -c -d /dev/sdc -p 2 -L <span class="string">&quot;UnraidSSD&quot;</span> -l <span class="string">&#x27;\EFI\BOOT\BOOTX64.EFI&#x27;</span></span><br><span class="line">efibootmgr -o 0000</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">efibootmgr -c -d /dev/sdc -p 2 -L <span class="string">&quot;UnraidSSD&quot;</span> -l <span class="string">&#x27;\EFI\BOOT\BOOTX64.EFI&#x27;</span></span><br><span class="line">efibootmgr -o 0000</span><br></pre></td></tr></table></figure></div>
 
 <p>最终：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BootCurrent: 0001</span><br><span class="line">BootOrder: 0000</span><br><span class="line">Boot0000* UnraidSSD</span><br><span class="line">Boot0001* UEFI: USB-Boot-Device, Partition 1</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BootCurrent: 0001</span><br><span class="line">BootOrder: 0000</span><br><span class="line">Boot0000* UnraidSSD</span><br><span class="line">Boot0001* UEFI: USB-Boot-Device, Partition 1</span><br></pre></td></tr></table></figure></div>
 
 <p>看起来已经正确。</p>
 <p>但拔掉 U 盘后，机器仍然直接进入 BIOS，Boot 页面看不到这个 SSD。</p>
@@ -412,7 +900,7 @@
 </blockquote>
 <p>这就解释了所有现象。</p>
 <p>系统启动后，Linux 能看到 SSD：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sdc 223.6G &lt;ENTERPRISE-SATA-SSD-MODEL-REDACTED&gt;</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sdc 223.6G &lt;ENTERPRISE-SATA-SSD-MODEL-REDACTED&gt;</span><br></pre></td></tr></table></figure></div>
 
 <p>但 BIOS 阶段看不到启动项。</p>
 <p>这是典型的：</p>
@@ -546,23 +1034,23 @@
 </ul>
 <hr>
 <h2 id="十四、TPM-许可迁移后的多个-key-文件问题"><a href="#十四、TPM-许可迁移后的多个-key-文件问题" class="headerlink" title="十四、TPM 许可迁移后的多个 key 文件问题"></a>十四、TPM 许可迁移后的多个 key 文件问题</h2><p>Internal Boot 成功后，Unraid 进入注册页面，提示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">存在多个许可证密钥</span><br><span class="line">License key type: Invalid</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">存在多个许可证密钥</span><br><span class="line">License key type: Invalid</span><br></pre></td></tr></table></figure></div>
 
 <p>检查：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /boot/config/*.key</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /boot/config/*.key</span><br></pre></td></tr></table></figure></div>
 
 <p>发现：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/boot/config/Basic.key</span><br><span class="line">/boot/config/Plus.key</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/boot/config/Basic.key</span><br><span class="line">/boot/config/Plus.key</span><br></pre></td></tr></table></figure></div>
 
 <p>也就是 <code>/boot/config</code> 下有多个 key 文件。</p>
 <p>Unraid 7.3 TPM licensing 对 key 文件更严格，只能保留一个有效 key。</p>
 <p>最终删除旧的 Basic.key：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> /boot/config/Basic.key</span><br><span class="line"><span class="built_in">sync</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> /boot/config/Basic.key</span><br><span class="line"><span class="built_in">sync</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure></div>
 
 <p>然后重新更新密钥，许可恢复。</p>
 <hr>
 <h2 id="十五、License-Expires-After-是什么？"><a href="#十五、License-Expires-After-是什么？" class="headerlink" title="十五、License Expires After 是什么？"></a>十五、License Expires After 是什么？</h2><p>迁移 TPM license 后，页面显示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Unraid Plus License</span><br><span class="line">GUID: &lt;LICENSE-GUID-REDACTED&gt;</span><br><span class="line">License Expires After: 2025-09-11</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Unraid Plus License</span><br><span class="line">GUID: &lt;LICENSE-GUID-REDACTED&gt;</span><br><span class="line">License Expires After: 2025-09-11</span><br></pre></td></tr></table></figure></div>
 
 <p>这个地方容易误解。</p>
 <p>它不是说系统到期不能用了。</p>
@@ -574,7 +1062,7 @@
 <li>但是否能继续享受 lifetime updates，要看账号里 Manage Purchases 的状态。</li>
 </ul>
 <p>本次账号的 Manage Purchases 中显示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OS Updates: Lifetime</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OS Updates: Lifetime</span><br></pre></td></tr></table></figure></div>
 
 <p>因此这里需要向 Unraid support 确认：</p>
 <blockquote>
@@ -629,10 +1117,10 @@
 <hr>
 <h2 id="十七、这次折腾的经验总结"><a href="#十七、这次折腾的经验总结" class="headerlink" title="十七、这次折腾的经验总结"></a>十七、这次折腾的经验总结</h2><h3 id="1-Btrfs-scrub-能修复，不代表硬盘健康"><a href="#1-Btrfs-scrub-能修复，不代表硬盘健康" class="headerlink" title="1. Btrfs scrub 能修复，不代表硬盘健康"></a>1. Btrfs scrub 能修复，不代表硬盘健康</h3><p>如果 scrub 出现 corrected，而不是 uncorrectable，只说明镜像起作用了。</p>
 <p>真正要看：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">btrfs device stats /mnt/cache</span><br><span class="line">dmesg | grep -i nvme</span><br><span class="line">smartctl -a /dev/nvmeXn1</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">btrfs device stats /mnt/cache</span><br><span class="line">dmesg | grep -i nvme</span><br><span class="line">smartctl -a /dev/nvmeXn1</span><br></pre></td></tr></table></figure></div>
 
 <p>尤其是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Media and Data Integrity Errors</span><br><span class="line">critical medium error</span><br><span class="line">corruption_errs</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Media and Data Integrity Errors</span><br><span class="line">critical medium error</span><br><span class="line">corruption_errs</span><br></pre></td></tr></table></figure></div>
 
 <p>这些才是判断硬盘是否可靠的关键。</p>
 <hr>
@@ -646,11 +1134,11 @@
 </ul>
 <hr>
 <h3 id="3-Btrfs-的-used-和-allocated-不是一回事"><a href="#3-Btrfs-的-used-和-allocated-不是一回事" class="headerlink" title="3. Btrfs 的 used 和 allocated 不是一回事"></a>3. Btrfs 的 used 和 allocated 不是一回事</h3><p>这次最大坑之一是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FS bytes used 372G</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FS bytes used 372G</span><br></pre></td></tr></table></figure></div>
 
 <p>但 replace 512G 仍然失败。</p>
 <p>原因是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Device allocated</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Device allocated</span><br></pre></td></tr></table></figure></div>
 
 <p>过高。</p>
 <p>Btrfs replace &#x2F; shrink &#x2F; balance 过程中，allocated chunk 非常关键。</p>
@@ -668,7 +1156,7 @@
 <hr>
 <h3 id="5-Internal-Boot-最适合用“专用启动池”"><a href="#5-Internal-Boot-最适合用“专用启动池”" class="headerlink" title="5. Internal Boot 最适合用“专用启动池”"></a>5. Internal Boot 最适合用“专用启动池”</h3><p>不建议把 boot SSD 同时当普通 data pool 使用。</p>
 <p>更稳结构是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">小企业 SATA SSD = 专用 Internal Boot</span><br><span class="line">NVMe / SSD = cache</span><br><span class="line">HDD = array</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">小企业 SATA SSD = 专用 Internal Boot</span><br><span class="line">NVMe / SSD = cache</span><br><span class="line">HDD = array</span><br></pre></td></tr></table></figure></div>
 
 <hr>
 <h3 id="6-企业-SATA-SSD-做-boot-很合适"><a href="#6-企业-SATA-SSD-做-boot-很合适" class="headerlink" title="6. 企业 SATA SSD 做 boot 很合适"></a>6. 企业 SATA SSD 做 boot 很合适</h3><p>240G S4610 这种盘虽然不新，但做 Unraid Boot 非常合适：</p>
@@ -695,18 +1183,18 @@
 </blockquote>
 <hr>
 <h3 id="8-TPM-license-迁移后，注意-boot-config-下只能留一个-key"><a href="#8-TPM-license-迁移后，注意-boot-config-下只能留一个-key" class="headerlink" title="8. TPM license 迁移后，注意 /boot/config 下只能留一个 key"></a>8. TPM license 迁移后，注意 <code>/boot/config</code> 下只能留一个 key</h3><p>如果出现：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">存在多个许可证密钥</span><br><span class="line">License key type: Invalid</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">存在多个许可证密钥</span><br><span class="line">License key type: Invalid</span><br></pre></td></tr></table></figure></div>
 
 <p>检查：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /boot/config/*.key</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /boot/config/*.key</span><br></pre></td></tr></table></figure></div>
 
 <p>只保留当前有效的 key，删除旧 key。</p>
 <hr>
 <h3 id="9-Legacy-Plus-用户迁移-TPM-后，要确认-lifetime-updates-状态"><a href="#9-Legacy-Plus-用户迁移-TPM-后，要确认-lifetime-updates-状态" class="headerlink" title="9. Legacy Plus 用户迁移 TPM 后，要确认 lifetime updates 状态"></a>9. Legacy Plus 用户迁移 TPM 后，要确认 lifetime updates 状态</h3><p>如果页面显示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">License Expires After</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">License Expires After</span><br></pre></td></tr></table></figure></div>
 
 <p>但账号里显示：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OS Updates: Lifetime</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OS Updates: Lifetime</span><br></pre></td></tr></table></figure></div>
 
 <p>建议联系 Unraid support 确认。</p>
 <p>尤其是 legacy Basic &#x2F; Plus &#x2F; Pro 用户，理论上应保留 lifetime updates。</p>
@@ -745,7 +1233,7 @@
 </tr>
 </tbody></table>
 <p>当前更合理的最终结构应该是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">S4610 240G       → 板载 SATA，Internal Boot</span><br><span class="line">1T NVMe  → Cache</span><br><span class="line">512G NVMe        → 临时备用 / 后续 mirror</span><br><span class="line">HDD Array        → 主数据</span><br><span class="line">LSI SAS2308      → 只接 HDD 数据盘</span><br></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">S4610 240G       → 板载 SATA，Internal Boot</span><br><span class="line">1T NVMe  → Cache</span><br><span class="line">512G NVMe        → 临时备用 / 后续 mirror</span><br><span class="line">HDD Array        → 主数据</span><br><span class="line">LSI SAS2308      → 只接 HDD 数据盘</span><br></pre></td></tr></table></figure></div>
 
 <hr>
 <h2 id="十九、结语"><a href="#十九、结语" class="headerlink" title="十九、结语"></a>十九、结语</h2><p>这次迁移本来只是想把 Unraid 从 U 盘启动改成内部 SSD 启动，但实际过程中暴露出的问题远比预期多。</p>
@@ -759,40 +1247,367 @@
 <p>启动盘接板载控制器，数据盘交给 HBA，cache 做好备份和定期 scrub。</p>
 </blockquote>
 <p>这次虽然过程很折腾，但也顺手发现并处理了一块已经开始出问题的 NVMe。某种意义上，Btrfs RAID1 和 scrub 算是提前救了一次数据。</p>
-</div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/UNRAID/">UNRAID</a></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><div class="social-share"></div><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">Like this article? Support the author with</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>Buy me a coffee</span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2026/05/06/PyCharm-Workspace-Mode-uv-Workspace-%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/"><span class="level-item">PyCharm Workspace Mode + uv Workspace 实战指南</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card" id="comments"><div class="card-content"><h3 class="title is-5">Comments</h3><div id="comment-container"></div><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"><script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script><script>var gitment = new Gitment({
-            id: '54ea61b0c5589b2b411c51f29d0f66ac',
-            repo: 'yuluo-ding.github.io',
-            owner: 'yuluo-ding',
-            oauth: {
-                client_id: '31f41b38bc8d25042f45',
-                client_secret: '592ecbad9b9ae372ec55c3f8319b0b4ad15ce500',
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>Title:</strong> Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题</li>
+        <li><strong>Author:</strong> yuluo</li>
+        <li><strong>Created at
+                :</strong> 2026-05-26 23:18:17</li>
+        
+            <li>
+                <strong>Updated at
+                    :</strong> 2026-05-26 23:32:02
+            </li>
+        
+        <li>
+            <strong>Link:</strong> https://yuluod.github.io/2026/05/26/Unraid-7-3-Internal-Boot-迁移实录：从-NVMe-故障、Btrfs-降级，到-TPM-许可与-HBA-启动问题/
+        </li>
+        <li>
+            <strong>
+                License:
+            </strong>
+            
+
+            
+                This work is licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>.
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/UNRAID/">#UNRAID</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/05/06/PyCharm-Workspace-Mode-uv-Workspace-%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">PyCharm Workspace Mode + uv Workspace 实战指南</span>
+						<span class="post-nav-item">Next posts</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">On this page</div>
+		<div class="page-title">Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%83%8C%E6%99%AF"><span class="nav-text">一、背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8E%9F%E5%A7%8B%E7%8E%AF%E5%A2%83"><span class="nav-text">二、原始环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%8F%91%E7%8E%B0%E9%97%AE%E9%A2%98%EF%BC%9ABtrfs-scrub-%E6%8A%A5%E9%94%99%E4%BD%86%E5%8F%AF%E4%BF%AE%E5%A4%8D"><span class="nav-text">三、第一次发现问题：Btrfs scrub 报错但可修复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%9C%9F%E6%AD%A3%E7%9A%84%E7%A1%AC%E7%9B%98%E6%95%85%E9%9A%9C%E8%AF%81%E6%8D%AE%EF%BC%9Adevice-stats-%E5%92%8C-dmesg"><span class="nav-text">四、真正的硬盘故障证据：device stats 和 dmesg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%85%B3%E4%BA%8E-SMART-%E7%9A%84%E4%B8%80%E4%B8%AA%E8%AF%AF%E5%8C%BA"><span class="nav-text">五、关于 SMART 的一个误区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81512G-%E6%9B%BF%E6%8D%A2-1T-cache-%E7%9B%98%E4%B8%BA%E4%BB%80%E4%B9%88%E5%A4%B1%E8%B4%A5%EF%BC%9F"><span class="nav-text">六、512G 替换 1T cache 盘为什么失败？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95%EF%BC%9A%E5%85%88%E9%99%8D%E7%BA%A7%E4%B8%BA%E5%8D%95%E7%9B%98%EF%BC%8C%E5%86%8D%E6%B8%85%E7%90%86-RAID1-allocation"><span class="nav-text">七、解决办法：先降级为单盘，再清理 RAID1 allocation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B2%A1%E6%9C%89%E7%AB%8B%E5%88%BB%E6%8A%8A-512G-%E5%8A%A0%E5%9B%9E-RAID1%EF%BC%9F"><span class="nav-text">八、为什么没有立刻把 512G 加回 RAID1？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81240G-S4610-%E5%81%9A-Internal-Boot-%E6%98%AF%E5%90%A6%E5%90%88%E9%80%82%EF%BC%9F"><span class="nav-text">九、240G S4610 做 Internal Boot 是否合适？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81Internal-Boot-%E9%A1%B5%E9%9D%A2%E4%B8%AD%E2%80%9C%E4%B8%93%E7%94%A8%E5%90%AF%E5%8A%A8%E6%B1%A0%E2%80%9D%E5%92%8C%E2%80%9C%E5%90%AF%E5%8A%A8-%E6%95%B0%E6%8D%AE%E6%B1%A0%E2%80%9D%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">十、Internal Boot 页面中“专用启动池”和“启动 + 数据池”的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81Internal-Boot-%E5%86%99%E5%85%A5%E6%88%90%E5%8A%9F%EF%BC%8C%E4%BD%86%E6%8B%94-U-%E7%9B%98%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8"><span class="nav-text">十一、Internal Boot 写入成功，但拔 U 盘无法启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E6%9C%80%E7%BB%88%E7%A1%AE%E8%AE%A4%EF%BC%9A%E9%97%AE%E9%A2%98%E5%87%BA%E5%9C%A8-LSI-SAS2308-HBA-%E5%90%AF%E5%8A%A8%E6%94%AF%E6%8C%81"><span class="nav-text">十二、最终确认：问题出在 LSI SAS2308 HBA 启动支持</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-A%EF%BC%9A%E5%90%AF%E5%8A%A8-SSD-%E6%8E%A5%E6%9D%BF%E8%BD%BD-SATA"><span class="nav-text">方案 A：启动 SSD 接板载 SATA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-B%EF%BC%9A%E7%BB%99-SAS2308-HBA-%E8%A1%A5%E5%88%B7-UEFI-ROM"><span class="nav-text">方案 B：给 SAS2308 HBA 补刷 UEFI ROM</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%89%E3%80%81BIOS-%E8%AE%BE%E7%BD%AE%E8%B8%A9%E5%9D%91"><span class="nav-text">十三、BIOS 设置踩坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E5%9B%9B%E3%80%81TPM-%E8%AE%B8%E5%8F%AF%E8%BF%81%E7%A7%BB%E5%90%8E%E7%9A%84%E5%A4%9A%E4%B8%AA-key-%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98"><span class="nav-text">十四、TPM 许可迁移后的多个 key 文件问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%94%E3%80%81License-Expires-After-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">十五、License Expires After 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E5%85%AD%E3%80%81%E6%9C%80%E7%BB%88%E7%8A%B6%E6%80%81"><span class="nav-text">十六、最终状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%83%E3%80%81%E8%BF%99%E6%AC%A1%E6%8A%98%E8%85%BE%E7%9A%84%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93"><span class="nav-text">十七、这次折腾的经验总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Btrfs-scrub-%E8%83%BD%E4%BF%AE%E5%A4%8D%EF%BC%8C%E4%B8%8D%E4%BB%A3%E8%A1%A8%E7%A1%AC%E7%9B%98%E5%81%A5%E5%BA%B7"><span class="nav-text">1. Btrfs scrub 能修复，不代表硬盘健康</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Windows-SMART-%E5%81%A5%E5%BA%B7%E7%8A%B6%E6%80%81%E4%B8%8D%E8%83%BD%E4%BD%9C%E4%B8%BA-NAS-%E5%8F%AF%E9%9D%A0%E6%80%A7%E5%88%A4%E6%96%AD"><span class="nav-text">2. Windows SMART 健康状态不能作为 NAS 可靠性判断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Btrfs-%E7%9A%84-used-%E5%92%8C-allocated-%E4%B8%8D%E6%98%AF%E4%B8%80%E5%9B%9E%E4%BA%8B"><span class="nav-text">3. Btrfs 的 used 和 allocated 不是一回事</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%99%8D%E5%AE%B9%E9%87%8F-replace-%E5%BE%88%E9%BA%BB%E7%83%A6%EF%BC%8C%E9%87%8D%E5%BB%BA-pool-%E6%9C%89%E6%97%B6%E5%8F%8D%E8%80%8C%E6%9B%B4%E5%B9%B2%E5%87%80"><span class="nav-text">4. 降容量 replace 很麻烦，重建 pool 有时反而更干净</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Internal-Boot-%E6%9C%80%E9%80%82%E5%90%88%E7%94%A8%E2%80%9C%E4%B8%93%E7%94%A8%E5%90%AF%E5%8A%A8%E6%B1%A0%E2%80%9D"><span class="nav-text">5. Internal Boot 最适合用“专用启动池”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E4%BC%81%E4%B8%9A-SATA-SSD-%E5%81%9A-boot-%E5%BE%88%E5%90%88%E9%80%82"><span class="nav-text">6. 企业 SATA SSD 做 boot 很合适</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-HBA-%E4%B8%8A%E8%83%BD%E8%A2%AB-Linux-%E8%AF%86%E5%88%AB%EF%BC%8C%E4%B8%8D%E4%BB%A3%E8%A1%A8%E8%83%BD%E8%A2%AB-BIOS-%E5%90%AF%E5%8A%A8"><span class="nav-text">7. HBA 上能被 Linux 识别，不代表能被 BIOS 启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-TPM-license-%E8%BF%81%E7%A7%BB%E5%90%8E%EF%BC%8C%E6%B3%A8%E6%84%8F-boot-config-%E4%B8%8B%E5%8F%AA%E8%83%BD%E7%95%99%E4%B8%80%E4%B8%AA-key"><span class="nav-text">8. TPM license 迁移后，注意 &#x2F;boot&#x2F;config 下只能留一个 key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Legacy-Plus-%E7%94%A8%E6%88%B7%E8%BF%81%E7%A7%BB-TPM-%E5%90%8E%EF%BC%8C%E8%A6%81%E7%A1%AE%E8%AE%A4-lifetime-updates-%E7%8A%B6%E6%80%81"><span class="nav-text">9. Legacy Plus 用户迁移 TPM 后，要确认 lifetime updates 状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E5%85%AB%E3%80%81%E6%9C%80%E7%BB%88%E6%8E%A8%E8%8D%90%E6%9E%B6%E6%9E%84"><span class="nav-text">十八、最终推荐架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B9%9D%E3%80%81%E7%BB%93%E8%AF%AD"><span class="nav-text">十九、结语</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2022</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">yuluo</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        234 posts in total
+                    </span>
+                    
+                </p>
+            
+        </div>
+        
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">VISITOR COUNT</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">TOTAL PAGE VIEWS</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">POWERED BY <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a></span>
+            <span class="text-sm lg:block">THEME&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                Blog up for <span class="odometer" id="runtime_days" ></span> days <span class="odometer" id="runtime_hours"></span> hrs <span class="odometer" id="runtime_minutes"></span> Min <span class="odometer" id="runtime_seconds"></span> Sec
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="Image viewer">
+	<button class="image-viewer-close" type="button" aria-label="Close">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="Prev">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="Close">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="Next">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
             },
-            perPage: 20,
-            maxCommentHeight: 250
-        })
-        gitment.render('comment-container')</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg" alt="yuluo"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">yuluo</p><p class="is-size-6 is-block">My vision My life</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">Posts</p><a href="/archives/"><p class="title">234</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">Categories</p><a href="/categories/"><p class="title">26</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">Tags</p><a href="/tags/"><p class="title">68</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/yuluod" target="_blank" rel="me noopener">Follow</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="me noopener" title="Github" href="https://github.com/yuluod"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="me noopener" title="RSS" href="/"><i class="fas fa-rss"></i></a></div></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">Catalogue</h3><ul class="menu-list"><li><a class="level is-mobile" href="#一、背景"><span class="level-left"><span class="level-item">1</span><span class="level-item">一、背景</span></span></a></li><li><a class="level is-mobile" href="#二、原始环境"><span class="level-left"><span class="level-item">2</span><span class="level-item">二、原始环境</span></span></a></li><li><a class="level is-mobile" href="#三、第一次发现问题：Btrfs-scrub-报错但可修复"><span class="level-left"><span class="level-item">3</span><span class="level-item">三、第一次发现问题：Btrfs scrub 报错但可修复</span></span></a></li><li><a class="level is-mobile" href="#四、真正的硬盘故障证据：device-stats-和-dmesg"><span class="level-left"><span class="level-item">4</span><span class="level-item">四、真正的硬盘故障证据：device stats 和 dmesg</span></span></a></li><li><a class="level is-mobile" href="#五、关于-SMART-的一个误区"><span class="level-left"><span class="level-item">5</span><span class="level-item">五、关于 SMART 的一个误区</span></span></a></li><li><a class="level is-mobile" href="#六、512G-替换-1T-cache-盘为什么失败？"><span class="level-left"><span class="level-item">6</span><span class="level-item">六、512G 替换 1T cache 盘为什么失败？</span></span></a></li><li><a class="level is-mobile" href="#七、解决办法：先降级为单盘，再清理-RAID1-allocation"><span class="level-left"><span class="level-item">7</span><span class="level-item">七、解决办法：先降级为单盘，再清理 RAID1 allocation</span></span></a></li><li><a class="level is-mobile" href="#八、为什么没有立刻把-512G-加回-RAID1？"><span class="level-left"><span class="level-item">8</span><span class="level-item">八、为什么没有立刻把 512G 加回 RAID1？</span></span></a></li><li><a class="level is-mobile" href="#九、240G-S4610-做-Internal-Boot-是否合适？"><span class="level-left"><span class="level-item">9</span><span class="level-item">九、240G S4610 做 Internal Boot 是否合适？</span></span></a></li><li><a class="level is-mobile" href="#十、Internal-Boot-页面中“专用启动池”和“启动-数据池”的区别"><span class="level-left"><span class="level-item">10</span><span class="level-item">十、Internal Boot 页面中“专用启动池”和“启动 + 数据池”的区别</span></span></a></li><li><a class="level is-mobile" href="#十一、Internal-Boot-写入成功，但拔-U-盘无法启动"><span class="level-left"><span class="level-item">11</span><span class="level-item">十一、Internal Boot 写入成功，但拔 U 盘无法启动</span></span></a></li><li><a class="level is-mobile" href="#十二、最终确认：问题出在-LSI-SAS2308-HBA-启动支持"><span class="level-left"><span class="level-item">12</span><span class="level-item">十二、最终确认：问题出在 LSI SAS2308 HBA 启动支持</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#方案-A：启动-SSD-接板载-SATA"><span class="level-left"><span class="level-item">12.1</span><span class="level-item">方案 A：启动 SSD 接板载 SATA</span></span></a></li><li><a class="level is-mobile" href="#方案-B：给-SAS2308-HBA-补刷-UEFI-ROM"><span class="level-left"><span class="level-item">12.2</span><span class="level-item">方案 B：给 SAS2308 HBA 补刷 UEFI ROM</span></span></a></li></ul></li><li><a class="level is-mobile" href="#十三、BIOS-设置踩坑"><span class="level-left"><span class="level-item">13</span><span class="level-item">十三、BIOS 设置踩坑</span></span></a></li><li><a class="level is-mobile" href="#十四、TPM-许可迁移后的多个-key-文件问题"><span class="level-left"><span class="level-item">14</span><span class="level-item">十四、TPM 许可迁移后的多个 key 文件问题</span></span></a></li><li><a class="level is-mobile" href="#十五、License-Expires-After-是什么？"><span class="level-left"><span class="level-item">15</span><span class="level-item">十五、License Expires After 是什么？</span></span></a></li><li><a class="level is-mobile" href="#十六、最终状态"><span class="level-left"><span class="level-item">16</span><span class="level-item">十六、最终状态</span></span></a></li><li><a class="level is-mobile" href="#十七、这次折腾的经验总结"><span class="level-left"><span class="level-item">17</span><span class="level-item">十七、这次折腾的经验总结</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#1-Btrfs-scrub-能修复，不代表硬盘健康"><span class="level-left"><span class="level-item">17.1</span><span class="level-item">1. Btrfs scrub 能修复，不代表硬盘健康</span></span></a></li><li><a class="level is-mobile" href="#2-Windows-SMART-健康状态不能作为-NAS-可靠性判断"><span class="level-left"><span class="level-item">17.2</span><span class="level-item">2. Windows SMART 健康状态不能作为 NAS 可靠性判断</span></span></a></li><li><a class="level is-mobile" href="#3-Btrfs-的-used-和-allocated-不是一回事"><span class="level-left"><span class="level-item">17.3</span><span class="level-item">3. Btrfs 的 used 和 allocated 不是一回事</span></span></a></li><li><a class="level is-mobile" href="#4-降容量-replace-很麻烦，重建-pool-有时反而更干净"><span class="level-left"><span class="level-item">17.4</span><span class="level-item">4. 降容量 replace 很麻烦，重建 pool 有时反而更干净</span></span></a></li><li><a class="level is-mobile" href="#5-Internal-Boot-最适合用“专用启动池”"><span class="level-left"><span class="level-item">17.5</span><span class="level-item">5. Internal Boot 最适合用“专用启动池”</span></span></a></li><li><a class="level is-mobile" href="#6-企业-SATA-SSD-做-boot-很合适"><span class="level-left"><span class="level-item">17.6</span><span class="level-item">6. 企业 SATA SSD 做 boot 很合适</span></span></a></li><li><a class="level is-mobile" href="#7-HBA-上能被-Linux-识别，不代表能被-BIOS-启动"><span class="level-left"><span class="level-item">17.7</span><span class="level-item">7. HBA 上能被 Linux 识别，不代表能被 BIOS 启动</span></span></a></li><li><a class="level is-mobile" href="#8-TPM-license-迁移后，注意-boot-config-下只能留一个-key"><span class="level-left"><span class="level-item">17.8</span><span class="level-item">8. TPM license 迁移后，注意 /boot/config 下只能留一个 key</span></span></a></li><li><a class="level is-mobile" href="#9-Legacy-Plus-用户迁移-TPM-后，要确认-lifetime-updates-状态"><span class="level-left"><span class="level-item">17.9</span><span class="level-item">9. Legacy Plus 用户迁移 TPM 后，要确认 lifetime updates 状态</span></span></a></li></ul></li><li><a class="level is-mobile" href="#十八、最终推荐架构"><span class="level-left"><span class="level-item">18</span><span class="level-item">十八、最终推荐架构</span></span></a></li><li><a class="level is-mobile" href="#十九、结语"><span class="level-left"><span class="level-item">19</span><span class="level-item">十九、结语</span></span></a></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">Categories</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/Android/"><span class="level-start"><span class="level-item">Android</span></span><span class="level-end"><span class="level-item tag">23</span></span></a></li><li><a class="level is-mobile" href="/categories/Android-Studio/"><span class="level-start"><span class="level-item">Android Studio</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/Apple/"><span class="level-start"><span class="level-item">Apple</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/Cloudflare/"><span class="level-start"><span class="level-item">Cloudflare</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/DEV/"><span class="level-start"><span class="level-item">DEV</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/Front-Dev/"><span class="level-start"><span class="level-item">Front-Dev</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/GIT/"><span class="level-start"><span class="level-item">GIT</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/GitHub/"><span class="level-start"><span class="level-item">GitHub</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/Github/"><span class="level-start"><span class="level-item">Github</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/Google/"><span class="level-start"><span class="level-item">Google</span></span><span class="level-end"><span class="level-item tag">5</span></span></a></li><li><a class="level is-mobile" href="/categories/HTTP/"><span class="level-start"><span class="level-item">HTTP</span></span><span class="level-end"><span class="level-item tag">5</span></span></a></li><li><a class="level is-mobile" href="/categories/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/Life/"><span class="level-start"><span class="level-item">Life</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/Linux/"><span class="level-start"><span class="level-item">Linux</span></span><span class="level-end"><span class="level-item tag">42</span></span></a></li><li><a class="level is-mobile" href="/categories/NAS/"><span class="level-start"><span class="level-item">NAS</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/Photos/"><span class="level-start"><span class="level-item">Photos</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/Python/"><span class="level-start"><span class="level-item">Python</span></span><span class="level-end"><span class="level-item tag">65</span></span></a></li><li><a class="level is-mobile" href="/categories/Regex/"><span class="level-start"><span class="level-item">Regex</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/Soft/"><span class="level-start"><span class="level-item">Soft</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/Study-Class/"><span class="level-start"><span class="level-item">Study Class</span></span><span class="level-end"><span class="level-item tag">9</span></span></a></li><li><a class="level is-mobile" href="/categories/Tools/"><span class="level-start"><span class="level-item">Tools</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/WeiXin/"><span class="level-start"><span class="level-item">WeiXin</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/Windows/"><span class="level-start"><span class="level-item">Windows</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/Xposed/"><span class="level-start"><span class="level-item">Xposed</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/hexo%E6%95%99%E7%A8%8B/"><span class="level-start"><span class="level-item">hexo教程</span></span><span class="level-end"><span class="level-item tag">10</span></span></a></li><li><a class="level is-mobile" href="/categories/macOS/"><span class="level-start"><span class="level-item">macOS</span></span><span class="level-end"><span class="level-item tag">14</span></span></a></li></ul></div></div></div><div class="card widget" data-type="subscribe-email"><div class="card-content"><div class="menu"><h3 class="menu-label">Subscribe for updates</h3><form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open(&#039;https://feedburner.google.com/fb/a/mailverify?uri=&#039;,&#039;popupwindow&#039;,&#039;scrollbars=yes,width=550,height=520&#039;);return true"><input type="hidden" value="" name="uri"><input type="hidden" name="loc" value="en_US"><div class="field has-addons"><div class="control has-icons-left is-expanded"><input class="input" name="email" type="email" placeholder="Email"><span class="icon is-small is-left"><i class="fas fa-envelope"></i></span></div><div class="control"><input class="button" type="submit" value="Subscribe"></div></div></form></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">Recents</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-05-26T15:18:17.000Z">2026-05-26</time></p><p class="title"><a href="/2026/05/26/Unraid-7-3-Internal-Boot-%E8%BF%81%E7%A7%BB%E5%AE%9E%E5%BD%95%EF%BC%9A%E4%BB%8E-NVMe-%E6%95%85%E9%9A%9C%E3%80%81Btrfs-%E9%99%8D%E7%BA%A7%EF%BC%8C%E5%88%B0-TPM-%E8%AE%B8%E5%8F%AF%E4%B8%8E-HBA-%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98/">Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题</a></p><p class="categories"><a href="/categories/NAS/">NAS</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-05-06T02:53:08.000Z">2026-05-06</time></p><p class="title"><a href="/2026/05/06/PyCharm-Workspace-Mode-uv-Workspace-%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/">PyCharm Workspace Mode + uv Workspace 实战指南</a></p><p class="categories"><a href="/categories/Python/">Python</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-02-09T14:40:36.000Z">2026-02-09</time></p><p class="title"><a href="/2026/02/09/%E4%B8%80%E6%AC%A1%E3%80%8Ccargo-%E7%AA%81%E7%84%B6%E6%B6%88%E5%A4%B1%E3%80%8D%E4%B9%8B%E5%90%8E%EF%BC%9A%E8%81%8A%E8%81%8A-GitHub-Actions-%E6%9C%AC%E6%9C%BA-self-hosted-runner-%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%89%93%E5%BC%80%E6%96%B9%E5%BC%8F/">一次「cargo 突然消失」之后：聊聊 GitHub Actions + 本机 self-hosted runner 的正确打开方式</a></p><p class="categories"><a href="/categories/GitHub/">GitHub</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-01-29T03:05:14.000Z">2026-01-29</time></p><p class="title"><a href="/2026/01/29/%E4%BD%BF%E7%94%A8-Cloudflare-R2-Workers-%E6%9E%84%E5%BB%BA%E7%A8%B3%E5%AE%9A%E3%80%81%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E8%BD%AF%E4%BB%B6%E4%B8%8B%E8%BD%BD%E5%88%86%E5%8F%91/">使用 Cloudflare R2 + Workers 构建稳定、高性能的软件下载分发</a></p><p class="categories"><a href="/categories/Cloudflare/">Cloudflare</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-11-23T08:25:37.000Z">2025-11-23</time></p><p class="title"><a href="/2025/11/23/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E5%BC%80%E5%A7%8B%E4%BB%8E-RGB-%E8%BD%AC%E5%90%91-OKLCH-%E2%80%94%E2%80%94-%E9%A2%9C%E8%89%B2%E5%A4%84%E7%90%86%E7%9A%84%E6%96%B0%E9%98%B6%E6%AE%B5/">为什么我开始从 RGB 转向 OKLCH —— 颜色处理的新阶段</a></p><p class="categories"><a href="/categories/Front-Dev/">Front-Dev</a></p></div></article></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">Tags</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Android/"><span class="tag">Android</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Apple/"><span class="tag">Apple</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/BBR/"><span class="tag">BBR</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Baby/"><span class="tag">Baby</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Btrfs/"><span class="tag">Btrfs</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/CSV/"><span class="tag">CSV</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/CentOS-7/"><span class="tag">CentOS 7</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Chrome/"><span class="tag">Chrome</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Cloudflare/"><span class="tag">Cloudflare</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Debian/"><span class="tag">Debian</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Debian12/"><span class="tag">Debian12</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Docker/"><span class="tag">Docker</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Flask/"><span class="tag">Flask</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GitHub-Actions/"><span class="tag">GitHub Actions</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Github/"><span class="tag">Github</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Google-Play/"><span class="tag">Google Play</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/HTTP/"><span class="tag">HTTP</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hash/"><span class="tag">Hash</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/IPV4/"><span class="tag">IPV4</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JSON/"><span class="tag">JSON</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Linux/"><span class="tag">Linux</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MarkItDown/"><span class="tag">MarkItDown</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/NAS/"><span class="tag">NAS</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/None/"><span class="tag">None</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/OneDrive/"><span class="tag">OneDrive</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SSH/"><span class="tag">SSH</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/UNRAID/"><span class="tag">UNRAID</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Ubuntu18/"><span class="tag">Ubuntu18</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Workspace/"><span class="tag">Workspace</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/XML/"><span class="tag">XML</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Xposed/"><span class="tag">Xposed</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/brew/"><span class="tag">brew</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/csv/"><span class="tag">csv</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/dic/"><span class="tag">dic</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/dict/"><span class="tag">dict</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/docker/"><span class="tag">docker</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/exiftool/"><span class="tag">exiftool</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/hexo/"><span class="tag">hexo</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/iTunes/"><span class="tag">iTunes</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/list/"><span class="tag">list</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/macOS/"><span class="tag">macOS</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/npm/"><span class="tag">npm</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/oklch/"><span class="tag">oklch,</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/path/"><span class="tag">path</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/pip/"><span class="tag">pip</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/python-linux/"><span class="tag">python, linux</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/tar/"><span class="tag">tar</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/terminal/"><span class="tag">terminal</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/txt/"><span class="tag">txt</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/ufw/"><span class="tag">ufw</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/unRAID/"><span class="tag">unRAID</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/vant/"><span class="tag">vant</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/webp/"><span class="tag">webp</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/windows/"><span class="tag">windows</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/xml/"><span class="tag">xml</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/yaml/"><span class="tag">yaml</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/zsh/"><span class="tag">zsh</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%B7%E6%9C%BA/"><span class="tag">刷机</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%8F%89%E5%8F%B7/"><span class="tag">叉号</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%B0%8F%E7%B1%B3-6/"><span class="tag">小米 6</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%BC%80%E5%85%B3%E6%9C%BA/"><span class="tag">开关机</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%89%8B%E6%9C%BA%E5%8F%B7/"><span class="tag">手机号</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E6%97%B6%E9%97%B4/"><span class="tag">格式化时间</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%94%9F%E6%B4%BB/"><span class="tag">生活</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%AB%AF%E5%8F%A3/"><span class="tag">端口</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%BD%91%E5%8D%A1/"><span class="tag">网卡</span><span class="tag">1</span></a></div></div></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/blog.svg" alt="iyuluo" height="28"></a><p class="is-size-7"><span>&copy; 2026 John Doe</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("en");</script><script>var IcarusThemeSettings = {
-            article: {
-                highlight: {
-                    clipboard: true,
-                    fold: 'unfolded'
-                }
-            }
-        };</script><script data-pjax src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="Back to top" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script data-pjax src="/js/back_to_top.js" defer></script><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
-            if (typeof $.fn.lightGallery === 'function') {
-                $('.article').lightGallery({ selector: '.gallery-item' });
-            }
-            if (typeof $.fn.justifiedGallery === 'function') {
-                if ($('.justified-gallery > p > .gallery-item').length) {
-                    $('.justified-gallery > p > .gallery-item').unwrap();
-                }
-                $('.justified-gallery').justifiedGallery();
-            }
-        });</script><!--!--><!--!--><div id="outdated"><h6>Your browser is out-of-date!</h6><p>Update your browser to view this website correctly.&amp;npsb;<a id="btnUpdateBrowser" target="_blank" rel="noopener" href="http://outdatedbrowser.com/">Update my browser now </a></p><p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">×</a></p></div><script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script><script>window.addEventListener("load", function () {
-            outdatedBrowser({
-                bgColor: '#f25648',
-                color: '#ffffff',
-                lowerThan: 'object-fit' // display on IE11 or below
-            });
-        });</script><!--!--><script data-pjax src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="Type something..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script data-pjax src="/js/insight.js" defer></script><script data-pjax>document.addEventListener('DOMContentLoaded', function () {
-            loadInsight({"contentUrl":"/content.json"}, {"hint":"Type something...","untitled":"(Untitled)","posts":"Posts","pages":"Pages","categories":"Categories","tags":"Tags"});
-        });</script></body></html>
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
