@@ -1,734 +1,2525 @@
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="keywords" content="Python, Linux, macOS, Android, Git, Hexo, 技术博客, 开发笔记">
-    
-    
-    <meta name="author" content="yuluo">
-    
-    <!-- Completely eliminate flash of wrong theme -->
-    <script>
-        (function() {
-            const THEME_KEY = "REDEFINE-THEME-STATUS";
-            const DARK = "dark", LIGHT = "light";
-            
-            // Get preferred theme
-            function getTheme() {
-                try {
-                    const saved = localStorage.getItem(THEME_KEY);
-                    if (saved) {
-                        const { isDark } = JSON.parse(saved);
-                        return isDark ? DARK : LIGHT;
-                    }
-                } catch (e) {}
-                
-                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
-            }
-            
-            // Apply theme to document
-            function applyTheme(theme) {
-                const isDark = theme === DARK;
-                const root = document.documentElement;
-                
-                // Set classes for compatibility
-                root.classList.add(theme);
-                root.classList.remove(isDark ? LIGHT : DARK);
-                root.style.colorScheme = theme;
-            }
-            
-            // Initial application
-            const theme = getTheme();
-            applyTheme(theme);
-            
-            // Listen for system preference changes
-            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
-                // Only update if using system preference (no localStorage entry)
-                if (!localStorage.getItem(THEME_KEY)) {
-                    applyTheme(matches ? DARK : LIGHT);
-                }
-            });
-            
-            // Set body classes ASAP (before DOMContentLoaded)
-            (function() {
-                const addBodyClass = () => {
-                    const b = document.body;
-                    if (!b) return false;
-                    b.classList.add(theme + "-mode");
-                    return true;
-                };
+  <meta charset="UTF-8">
 
-                // Try immediately
-                if (addBodyClass()) return;
-
-                // Observe until body exists
-                const mo = new MutationObserver(() => {
-                    if (addBodyClass()) mo.disconnect();
-                });
-                mo.observe(document.documentElement, { childList: true, subtree: true });
-            })();
-        })();
-    </script>
-    
-    <!-- preconnect -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    
-    <!--- Seo Part-->
-    
+  <link rel="apple-touch-icon" sizes="76x76" href="/favicon.ico">
+  <link rel="icon" href="/favicon.ico">
+  
     <link rel="canonical" href="https://yuluod.github.io/categories/"/>
-    <meta name="robots" content="index,follow">
-    <meta name="googlebot" content="index,follow">
-    <meta name="revisit-after" content="1 days">
-    
-    
-        
-        <meta name="description" content="记录Python、Linux、macOS、Android、Git等技术笔记与开发实践">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yuluo">
+  <meta name="keywords" content="Python, Linux, macOS, Android, Git, Hexo, 技术博客, 开发笔记">
+  
+    <meta name="description" content="记录Python、Linux、macOS、Android、Git等技术笔记与开发实践">
 <meta property="og:type" content="website">
 <meta property="og:title" content="分类">
 <meta property="og:url" content="https://yuluod.github.io/categories/index.html">
 <meta property="og:site_name" content="雨落杂记">
 <meta property="og:description" content="记录Python、Linux、macOS、Android、Git等技术笔记与开发实践">
-<meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://yuluod.github.io/images/redefine-og.webp">
-<meta property="article:published_time" content="2026-05-27T05:55:58.674Z">
-<meta property="article:modified_time" content="2026-05-27T05:55:58.672Z">
+<meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="yuluo">
 <meta property="article:tag" content="Python, Linux, macOS, Android, Git, Hexo, 技术博客, 开发笔记">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://yuluod.github.io/images/redefine-og.webp">
-    
-    
-        <!-- Google tag (gtag.js) -->
-        <script src="https://www.googletagmanager.com/gtag/js?id=UA-154977104-1"></script>
-        <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>分类 - 雨落杂记</title>
 
-        gtag('config', 'UA-154977104-1');
-        </script>
-    
-    <!--- Icon Part-->
-    <link rel="icon" type="image/png" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg" sizes="192x192">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg">
-    <meta name="theme-color" content="#A31F34">
-    <link rel="shortcut icon" href="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg">
-    <!--- Page Info-->
-    
-    <title>
-        
-            分类 | 雨落杂记
-        
-    </title>
-
-    
-<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
 
-    <!--- Inject Part-->
-    
-
-    
-<link rel="stylesheet" href="/css/style.css">
 
 
-    
-        
-<link rel="stylesheet" href="/css/build/tailwind.css">
 
-    
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
 
-    
-<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
 
-    
-<link rel="stylesheet" href="/fonts/Geist/geist.css">
 
-    <!--- Font Part-->
-    
-    
-    
-    
-    
-    
 
-    <script id="hexo-configurations">
-    window.config = {"hostname":"yuluod.github.io","root":"/","language":"en","path":"search.json"};
-    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"auto"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"记录Python、Linux、macOS、Android、Git等技术笔记与开发实践"},"google_analytics":{"enable":true,"id":"UA-154977104-1"}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpeg","dark":"/images/banner-light.jpeg"},"title":"雨落杂记","subtitle":{"text":["写点东西"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#333","dark":"#eee"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/yuluod"},{"icon":"fa-brands fa-rss","url":"/atom.xml"},{"icon":"fa-solid fa-at","url":"you@example.com"},{"icon":"fa-brands fa-telegram","url":null},{"icon":"/images/custom-icon.svg","url":null}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"}},"navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"cloud","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #f54545\"></i>","start":"2022/8/17 11:45:14","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null},"style":"blend","copyright":{"enable":true,"since":2015,"custom":null},"social_links":{"copyright":{"Github":{"icon":"fa-brands fa-github","url":"https://github.com/yuluod"},"RSS":{"icon":"fa-solid fa-rss","url":"/atom.xml"}}}},"footerStart":"2022/8/17 11:45:14","mermaid":{"style":{"light":"default","dark":"dark"}}};
-    window.lang_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
-    window.i18n = {"search":"Search...","toc":"On this page","prev":"Prev","next":"Next","prev_posts":"Prev posts","next_posts":"Next posts","page":"Page %d","recent_posts":"Recent Posts","share":"Share","powered_by":"POWERED BY %s","theme":"THEME","rss_feed":"RSS Feed","category":"Category","categories":"Categories","tag":"Tag","tags":"Tags","post":"Post","posts":"Posts","tagcloud":"Tag Cloud","comment":"Comment","comments":"Comments","home":"Home","archive":"Archive","archives":"Archives","top":"TOP","sticky":"Sticky","go-back-home":"Go Back Home","masonry_loading":"Loading photos...","image_viewer":"Image viewer","close":"Close","exif":{"title":"EXIF","cards":{"camera":"Camera","lens":"Lens","exposure":"Exposure","other":"Other"},"fields":{"make":"Brand","model":"Model","date_taken":"Date taken","lens_model":"Lens","focal_length":"Focal length","focus_mode":"Focus mode","shutter":"Shutter","aperture":"Aperture","iso":"ISO","exposure_program":"Exposure program","exposure_compensation":"Exposure compensation","metering_mode":"Metering mode","flash":"Flash","white_balance":"White balance","latitude":"Latitude","longitude":"Longitude","altitude":"Altitude"},"status":{"loading":"Loading...","no_exif":"No EXIF available","library_missing":"EXIF library not loaded","image_source_missing":"Image source unavailable","unavailable":"EXIF unavailable (blocked by CORS or missing metadata)","flag_unavailable":"EXIF unavailable"}},"about":"About","changelog":"Changelog","links":"Links","link":"Link","friends":"Friends","friend":"Friend","timeline":"Timeline","shuoshuo":"Shuoshuo","bookmarks":"Bookmarks","site_uv":"VISITOR COUNT","site_pv":"TOTAL PAGE VIEWS","read_more":"Read more","wordcount":"Words","min2read":"Mins","status":"Status","runtime":"Blog up for","days":"days","hours":"hrs","minutes":"Min","seconds":"Sec","optimized_by":"and Optimized by Evan","rights":"All Rights Reserved","site_posts":"%s posts in total","site_wordcount":"%s words in total","copyright":{"author":"Author","title":"Title","link":"Link","create_time":"Created at","update_time":"Updated at","license_title":"License","license_content":"This work is licensed under %s.","all_rights_reserved":"All Rights Reserved &#169; %s","public_domain":"This work is in the public domain."},"ago":{"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"},"create_time":"Created","update_time":"Updated","expired":"This post is written %s days ago, and the content may not be up to date."};
-    window.data = {"masonry":false};
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yuluod.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"代码"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"e2e61cddcd9eb21dc563c9a63bcc50fd","google":{"measurement_id":"G-M9SQ2D9F50"},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
   </script>
-    
-    <!--- Fontawesome Part-->
-    
-<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
 
-    
-<link rel="stylesheet" href="/fontawesome/brands.min.css">
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?e2e61cddcd9eb21dc563c9a63bcc50fd";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
 
-    
-<link rel="stylesheet" href="/fontawesome/solid.min.css">
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=G-M9SQ2D9F50", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', 'G-M9SQ2D9F50');
+        });
+      }
+    </script>
+  
 
-    
-<link rel="stylesheet" href="/fontawesome/regular.min.css">
+  
 
+  
+
+  
+
+  
     
-    
-    
-    
+  
+
+
+
+
+  
 <meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="雨落杂记" type="application/atom+xml">
 </head>
 
 
 <body>
-	<div class="progress-bar-container">
-	
+  
 
-	
-	<span class="pjax-progress-bar"></span>
-	<!--        <span class="swup-progress-icon">-->
-	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
-	<!--        </span>-->
-	
-</div>
+  <header>
+    
 
-<main class="page-container" id="swup">
+<div class="header-inner" style="height: 38vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>雨落杂记</strong>
+    </a>
 
-	
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
 
-	<div class="main-content-container flex flex-col justify-between min-h-dvh">
-		<div class="main-content-header">
-			<header class="navbar-container px-6 md:px-12">
-    <div class="navbar-content transition-navbar ">
-        <div class="left">
-            
-                <a class="logo-image h-8 w-8 sm:w-10 sm:h-10 mr-3" href="/">
-                    <img src="https://i.loli.net/2019/12/25/6sacLOd3NPln1Hb.jpg" class="w-full h-full rounded-xs">
-                </a>
-            
-            <a class="logo-title" href="/">
-                
-                雨落杂记
-                
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
             </a>
-        </div>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
 
-        <div class="right">
-            <!-- PC -->
-            <div class="desktop">
-                <ul class="navbar-list">
-                    
-                        
-                            
-
-                            <li class="navbar-item">
-                                <!-- Menu -->
-                                <a class=""
-                                   href="/"
-                                        >
-                                    <i class="fa-regular fa-house fa-fw"></i>
-                                    HOME
-                                    
-                                </a>
-
-                                <!-- Submenu -->
-                                
-                            </li>
-                    
-                        
-                            
-
-                            <li class="navbar-item">
-                                <!-- Menu -->
-                                <a class=""
-                                   href="/archives"
-                                        >
-                                    <i class="fa-regular fa-archive fa-fw"></i>
-                                    ARCHIVES
-                                    
-                                </a>
-
-                                <!-- Submenu -->
-                                
-                            </li>
-                    
-                        
-                            
-
-                            <li class="navbar-item">
-                                <!-- Menu -->
-                                <a class=""
-                                   href="/tags"
-                                        >
-                                    <i class="fa-regular fa-tags fa-fw"></i>
-                                    TAGS
-                                    
-                                </a>
-
-                                <!-- Submenu -->
-                                
-                            </li>
-                    
-                        
-                            
-
-                            <li class="navbar-item">
-                                <!-- Menu -->
-                                <a class=""
-                                   href="/about"
-                                        >
-                                    <i class="fa-regular fa-user fa-fw"></i>
-                                    ABOUT
-                                    
-                                </a>
-
-                                <!-- Submenu -->
-                                
-                            </li>
-                    
-                    
-                        <li class="navbar-item search search-popup-trigger">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </li>
-                    
-                </ul>
-            </div>
-            <!-- Mobile -->
-            <div class="mobile">
-                
-                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
-                    </div>
-                
-                <div class="icon-item navbar-bar">
-                    <div class="navbar-bar-middle"></div>
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
                 </div>
+              </a>
             </div>
-        </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
     </div>
-
-    <!-- Mobile sheet -->
-    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
-        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
-            
-                
-                    
-
-                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
-                        
-                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
-                           href="/"
-                        >
-                            <span>
-                                HOME
-                            </span>
-                            
-                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
-                            
-                        </a>
-                        
-
-                        
-                    </li>
-            
-                
-                    
-
-                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
-                        
-                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
-                           href="/archives"
-                        >
-                            <span>
-                                ARCHIVES
-                            </span>
-                            
-                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
-                            
-                        </a>
-                        
-
-                        
-                    </li>
-            
-                
-                    
-
-                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
-                        
-                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
-                           href="/tags"
-                        >
-                            <span>
-                                TAGS
-                            </span>
-                            
-                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
-                            
-                        </a>
-                        
-
-                        
-                    </li>
-            
-                
-                    
-
-                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
-                        
-                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
-                           href="/about"
-                        >
-                            <span>
-                                ABOUT
-                            </span>
-                            
-                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
-                            
-                        </a>
-                        
-
-                        
-                    </li>
-            
-
-            
-            
-                
-                    
-                    
-                    
-                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
-                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
-                           href="/categories"
-                        >
-                            <span>Categories</span>
-                            <i class="fa-regular fa-folder fa-sm fa-fw"></i>
-                        </a>
-                    </li>
-                
-            
-        </ul>
-
-        <div class="statistics flex justify-around my-2.5">
-    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">68</div>
-        <div class="label text-third-text-color text-sm">Tags</div>
-    </a>
-    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">26</div>
-        <div class="label text-third-text-color text-sm">Categories</div>
-    </a>
-    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">234</div>
-        <div class="label text-third-text-color text-sm">Posts</div>
-    </a>
+  </div>
 </div>
-    </div>
-
-    <div class="window-mask"></div>
-
-</header>
-
-
-		</div>
-
-		<div class="main-content-body transition-fade-up">
-			
-
-			<div class="main-content">
-				<div class="page-template-container">
-	
-
-	
-	<h1 class="page-title-header">
-	分类
-</h1>
-<div class="category-list-content">
-	<ul class="all-category-list"><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Android/">Android</a><span class="all-category-list-count">23</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Android-Studio/">Android Studio</a><span class="all-category-list-count">6</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Apple/">Apple</a><span class="all-category-list-count">6</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Cloudflare/">Cloudflare</a><span class="all-category-list-count">1</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/DEV/">DEV</a><span class="all-category-list-count">2</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Front-Dev/">Front-Dev</a><span class="all-category-list-count">3</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/GIT/">GIT</a><span class="all-category-list-count">3</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/GitHub/">GitHub</a><span class="all-category-list-count">1</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Github/">Github</a><span class="all-category-list-count">3</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Google/">Google</a><span class="all-category-list-count">5</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/HTTP/">HTTP</a><span class="all-category-list-count">5</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Java/">Java</a><span class="all-category-list-count">2</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Life/">Life</a><span class="all-category-list-count">6</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Linux/">Linux</a><span class="all-category-list-count">42</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/NAS/">NAS</a><span class="all-category-list-count">6</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Photos/">Photos</a><span class="all-category-list-count">1</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Python/">Python</a><span class="all-category-list-count">65</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Regex/">Regex</a><span class="all-category-list-count">2</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Soft/">Soft</a><span class="all-category-list-count">6</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Study-Class/">Study Class</a><span class="all-category-list-count">9</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Tools/">Tools</a><span class="all-category-list-count">3</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/WeiXin/">WeiXin</a><span class="all-category-list-count">2</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Windows/">Windows</a><span class="all-category-list-count">4</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/Xposed/">Xposed</a><span class="all-category-list-count">1</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/hexo%E6%95%99%E7%A8%8B/">hexo教程</a><span class="all-category-list-count">10</span></li><li class="all-category-list-item"><a class="all-category-list-link" href="/categories/macOS/">macOS</a><span class="all-category-list-count">14</span></li></ul>
-</div>
-<div class="category-comments">
-	
-</div>
-	
-
-	<div class="page-template-content markdown-body">
-		
-
-		
-	</div>
-
-	<div class="page-template-comments">
-		
-	</div>
-</div>
-
-<div class="paginator">
-	
-</div>
-  
-			</div>
-
-			
-		</div>
-
-		<div class="main-content-footer">
-			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
-    <div class="info-container py-3 text-center">
-        
-        <div class="text-center">
-            &copy;
-            
-              <span>2022</span>
-              -
-            
-            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">yuluo</a>
-            
-                
-                <p class="post-count space-x-0.5">
-                    <span>
-                        234 posts in total
-                    </span>
-                    
-                </p>
-            
-        </div>
-        
-            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
-            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
-                
-                    <span id="busuanzi_container_site_uv" class="lg:!block">
-                        <span class="text-sm">VISITOR COUNT</span>
-                        <span id="busuanzi_value_site_uv"></span>
-                    </span>
-                
-                
-                    <span id="busuanzi_container_site_pv" class="lg:!block">
-                        <span class="text-sm">TOTAL PAGE VIEWS</span>
-                        <span id="busuanzi_value_site_pv"></span>
-                    </span>
-                
-            </div>
-        
-        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
-            <span class="lg:block text-sm">POWERED BY <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a></span>
-            <span class="text-sm lg:block">THEME&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
-        </div>
-        
-        
-            <div>
-                Blog up for <span class="odometer" id="runtime_days" ></span> days <span class="odometer" id="runtime_hours"></span> hrs <span class="odometer" id="runtime_minutes"></span> Min <span class="odometer" id="runtime_seconds"></span> Sec
-            </div>
-        
-        
-            <script data-swup-reload-script>
-                try {
-                    function odometer_init() {
-                    const elements = document.querySelectorAll('.odometer');
-                    elements.forEach(el => {
-                        new Odometer({
-                            el,
-                            format: '( ddd).dd',
-                            duration: 200
-                        });
-                    });
-                    }
-                    odometer_init();
-                } catch (error) {}
-            </script>
-        
-        
-        
-    </div>  
-</footer>
-		</div>
-	</div>
-
-	
-
-	<div class="right-side-tools-container">
-		<div class="side-tools-container">
-	<ul class="hidden-tools-list">
-		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
-			<i class="fa-regular fa-magnifying-glass-plus"></i>
-		</li>
-
-		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
-			<i class="fa-regular fa-magnifying-glass-minus"></i>
-		</li>
-
-		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
-			<i class="fa-regular fa-moon"></i>
-		</li>
-
-		<!-- rss -->
-		
-
-		
-
-		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
-			<i class="fa-regular fa-arrow-down"></i>
-		</li>
-	</ul>
-
-	<ul class="visible-tools-list">
-		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
-			<i class="fa-regular fa-cog fa-spin"></i>
-		</li>
-		
-		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
-			<i class="arrow-up fas fa-arrow-up"></i>
-			<span class="percent"></span>
-		</li>
-		
-		
-	</ul>
-</div>
-	</div>
-
-	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="Image viewer">
-	<button class="image-viewer-close" type="button" aria-label="Close">
-		<i class="fa-solid fa-xmark"></i>
-	</button>
-	<button class="image-viewer-prev" type="button" aria-label="Prev">
-		<i class="fa-solid fa-chevron-left"></i>
-	</button>
-	<div class="image-viewer-frame">
-		<img src="" alt="">
-	</div>
-	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
-		<div class="flex items-center justify-between mb-3">
-			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
-			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="Close">
-				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
-			</button>
-		</div>
-		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
-		<template class="image-viewer-exif-card-template">
-			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
-				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
-					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
-					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
-				</div>
-				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
-			</div>
-		</template>
-	</div>
-	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
-		<i class="fa-solid fa-circle-info text-xs"></i>
-		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
-	</button>
-	<button class="image-viewer-next" type="button" aria-label="Next">
-		<i class="fa-solid fa-chevron-right"></i>
-	</button>
-</div>
-
-
-	
-	<div class="search-pop-overlay">
-	<div class="popup search-popup">
-		<div class="search-header">
-			<span class="search-input-field-pre">
-				<i class="fa-solid fa-keyboard"></i>
-			</span>
-			<div class="search-input-container">
-				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search..." spellcheck="false" type="search" class="search-input">
-			</div>
-			<span class="popup-btn-close">
-				<i class="fa-solid fa-times"></i>
-			</span>
-		</div>
-		<div id="search-result">
-			<div id="no-result">
-				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
-			</div>
-		</div>
-	</div>
-</div>
-	
-
-</main>
-
-
-
-<script src="/js/build/libs/Swup.min.js"></script>
-
-<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
-
-<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
-
-<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
-
-<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
-
-<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
-
-<script>
-    window.swup = new Swup({
-        plugins: [
-            new SwupScriptsPlugin({
-                optin: true,
-            }),
-            new SwupProgressPlugin(),
-            new SwupScrollPlugin({
-                offset: 80,
-            }),
-            new SwupSlideTheme({
-                mainElement: ".main-content-body",
-            }),
-            new SwupPreloadPlugin(),
-        ],
-        containers: ["#swup"],
-    });
-
-    window.dispatchEvent(
-        new CustomEvent("redefine:swup:ready", {
-            detail: {
-                swup: window.swup,
-            },
-        }),
-    );
-</script>
-
-
-
-	
-<script src="/js/build/main.js" type="module"></script>
-
-
-
-    
-<script src="/js/build/libs/odometer.min.js"></script>
-
-    
-<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
-
-
-
-
-
-
 
   
-<script src="/js/build/libs/Typed.min.js"></script>
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/images/banner-light.jpeg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.48)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="分类"></span>
+          
+        </div>
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      <div class="container nopadding-x-md">
+        <div id="board"
+          >
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
 
 
 
 
 
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Python"
+        id="heading-a7f5f35426b927411fc9231b56382173" role="tab" data-toggle="collapse" href="#collapse-a7f5f35426b927411fc9231b56382173"
+        aria-expanded="false"
+      >
+        Python
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Python/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>65</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-a7f5f35426b927411fc9231b56382173"
+           role="tabpanel" aria-labelledby="heading-a7f5f35426b927411fc9231b56382173">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2026/05/06/PyCharm-Workspace-Mode-uv-Workspace-%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/" title="PyCharm Workspace Mode + uv Workspace 实战指南"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">PyCharm Workspace Mode + uv Workspace 实战指南</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2025/02/11/MarkItDown-%E7%9C%9F%E7%9A%84%E5%A5%BD%E4%B9%88%EF%BC%9F/" title="MarkItDown 真的好么？"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">MarkItDown 真的好么？</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/12/18/%E4%B8%80%E4%B8%AA%E4%BD%BF%E7%94%A8%E7%9A%84Python%E4%B8%8B%E7%9A%84json%E5%BA%93%EF%BC%9Aorjson/" title="一个使用的Python下的JSON库：ORJSON"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">一个使用的Python下的JSON库：ORJSON</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/10/29/time%E4%B8%AD%E7%9A%84time-perf-counter-%E5%92%8Ctime-time-%E5%AF%B9%E6%AF%94/" title="time中的time.perf_counter()和time.time()对比"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">time中的time.perf_counter()和time.time()对比</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/09/12/%E8%A7%A3%E5%86%B3Flask%E8%BF%94%E5%9B%9E%E4%B8%AD%E6%96%87Unicode%E7%BC%96%E7%A0%81%E7%9A%84%E9%97%AE%E9%A2%98/" title="解决Flask返回中文Unicode编码的问题"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">解决Flask返回中文Unicode编码的问题</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/02/04/Python%E4%B8%8Bvirtualenv-venv-pipenv-%E4%B9%8B%E9%97%B4%E7%9A%84%E8%81%94%E7%B3%BB%E4%B8%8E%E5%8C%BA%E5%88%AB/" title="Python下virtualenv &amp; venv &amp; pipenv 之间的联系与区别"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Python下virtualenv &amp; venv &amp; pipenv 之间的联系与区别</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/09/01/Python%E6%9B%B4%E7%BE%8E%E8%A7%82%E8%BE%93%E5%87%BA%E5%AD%97%E5%85%B8/" title="Python更美观输出字典"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Python更美观输出字典</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/08/31/Python%E5%8E%BB%E9%99%A4-ufeff%E3%80%81-xa0%E3%80%81-u3000%E7%AD%89%E5%AD%97%E7%AC%A6/" title="Python去除\ufeff、\xa0、\u3000等字符"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Python去除\ufeff、\xa0、\u3000等字符</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/08/31/%E4%BD%BF%E7%94%A8Python%E8%8E%B7%E5%8F%96csv%E7%9A%84%E6%9F%90%E8%A1%8C%E3%80%81%E5%88%97%E7%9A%84%E6%95%B0%E6%8D%AE/" title="使用Python获取csv的某行、列的数据"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">使用Python获取csv的某行、列的数据</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/08/29/%E5%9C%A8Debian%E4%B8%8A%E5%AE%89%E8%A3%85pip%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/" title="在Debian上安装pip包管理器"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">在Debian上安装pip包管理器</span>
+        </a>
+      
+    
+      
+      
+        <a href="/categories/Python/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Linux"
+        id="heading-edc9f0a5a5d57797bf68e37364743831" role="tab" data-toggle="collapse" href="#collapse-edc9f0a5a5d57797bf68e37364743831"
+        aria-expanded="false"
+      >
+        Linux
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Linux/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>42</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-edc9f0a5a5d57797bf68e37364743831"
+           role="tabpanel" aria-labelledby="heading-edc9f0a5a5d57797bf68e37364743831">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2023/10/18/Debian-%E6%8C%89%E7%85%A7Docker/" title="Debian 安装Docker 和 Docker Compose"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Debian 安装Docker 和 Docker Compose</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2023/07/30/Debian11-%E5%8D%87%E7%BA%A7%E5%88%B0-Debian12/" title="Debian11 升级到 Debian12"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Debian11 升级到 Debian12</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2023/02/10/bash-warning-setlocale-LC-ALL-cannot-change-locale-en-US-UTF-8/" title=" bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8)"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post"> bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8)</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/07/04/%E5%A6%82%E4%BD%95%E5%90%AF%E7%94%A8BBR%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" title="如何启用BBR拥塞控制算法"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">如何启用BBR拥塞控制算法</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/01/11/Linux-%E4%BF%AE%E6%94%B9%E6%96%87%E4%BB%B6%E5%A4%B9%E6%9D%83%E9%99%90%E5%92%8C%E7%94%A8%E6%88%B7%E7%BB%84/" title="Linux 修改文件夹权限和用户组"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Linux 修改文件夹权限和用户组</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2021/08/26/Debian-10-%E5%8D%87%E7%BA%A7%E5%88%B0Debian-11/" title="Debian 10 升级到Debian 11"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Debian 10 升级到Debian 11</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2020/12/16/%E5%9C%A8Debian%E4%B8%8A%E4%BD%BF%E7%94%A8UFW/" title="在Debian上使用UFW"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">在Debian上使用UFW</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2020/12/08/%E8%A7%A3%E5%86%B3ln-s-%E8%BD%AF%E9%93%BE%E6%8E%A5%E7%9A%84%E6%8F%90%E7%A4%BA%E9%94%99%E8%AF%AF/" title="解决ln -s 软链接的提示错误"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">解决ln -s 软链接的提示错误</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2020/03/05/%E5%A6%82%E4%BD%95%E5%9C%A8Linux-%E4%B8%AD%E4%BC%98%E5%85%88%E4%BD%BF%E7%94%A8IPV-4/" title="如何在Linux 中优先使用IPV 4"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">如何在Linux 中优先使用IPV 4</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2020/02/27/SSH-%E8%BF%9E%E6%8E%A5%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%8A%A5%E9%94%99%EF%BC%9Assh-exchange-identification-Connection-closed-by-remote-host/" title="SSH 连接服务器报错：ssh_exchange_identification: Connection closed by remote host"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">SSH 连接服务器报错：ssh_exchange_identification: Connection closed by remote host</span>
+        </a>
+      
+    
+      
+      
+        <a href="/categories/Linux/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Android"
+        id="heading-e84e30b9390cdb64db6db2c9ab87846d" role="tab" data-toggle="collapse" href="#collapse-e84e30b9390cdb64db6db2c9ab87846d"
+        aria-expanded="false"
+      >
+        Android
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Android/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>23</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-e84e30b9390cdb64db6db2c9ab87846d"
+           role="tabpanel" aria-labelledby="heading-e84e30b9390cdb64db6db2c9ab87846d">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/05/16/RedMI-K40%E5%88%B7%E5%85%A5MIUI-EU%E5%9B%BD%E9%99%85%E7%89%88%E5%B9%B6%E4%B8%94%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0%E5%8C%96/" title="RedMI K40刷入MIUI EU国际版并且实现本地化"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">RedMI K40刷入MIUI EU国际版并且实现本地化</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2020/09/13/Open-GApps-%E7%9A%84%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC/" title="Open GApps 的不同版本"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Open GApps 的不同版本</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2020/08/10/%E5%8E%9F%E7%94%9FAndroid-%E5%8E%BB%E9%99%A4%E5%8F%89%E5%8F%B7/" title="原生Android 去除叉号"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">原生Android 去除叉号</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2019/10/23/%E5%B0%8F%E7%B1%B36-%E5%88%B7%E6%9C%BA%E8%AE%B0%E5%BD%95/" title="小米6 刷机记录"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">小米6 刷机记录</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2019/09/10/%E5%9C%A8Android-Pie%E4%B8%AD%E5%AE%89%E8%A3%85Xposed/" title="在Android Pie中安装Xposed"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">在Android Pie中安装Xposed</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2019/01/10/No-toolchains-found-in-the-NDK-toolchains-folder-for-ABI-with-prefix-mips64el-linux-android/" title="No toolchains found in the NDK toolchains folder for ABI with prefix:mips64el-linux-android"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">No toolchains found in the NDK toolchains folder for ABI with prefix:mips64el-linux-android</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2018/11/05/Android%E5%90%84%E5%9B%BD%E5%88%86%E5%8F%91%E6%B8%A0%E9%81%93/" title="Android各国分发渠道"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Android各国分发渠道</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/02/13/Android-java-lang-OutOfMemoryError-GC-overhead-limit-exceeded/" title="Android java.lang.OutOfMemoryError: GC overhead limit exceeded"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Android java.lang.OutOfMemoryError: GC overhead limit exceeded</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/08/22/IMEI%E5%92%8CMEID%E7%9A%84%E5%8C%BA%E5%88%AB/" title="IMEI和MEID的区别"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">IMEI和MEID的区别</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/23/%E5%A6%82%E4%BD%95%E8%87%AA%E5%AD%A6Android/" title="如何自学Android"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">如何自学Android</span>
+        </a>
+      
+    
+      
+      
+        <a href="/categories/Android/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="macOS"
+        id="heading-8b06df0295926efcdcc1f9e13c49848e" role="tab" data-toggle="collapse" href="#collapse-8b06df0295926efcdcc1f9e13c49848e"
+        aria-expanded="false"
+      >
+        macOS
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/macOS/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>14</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-8b06df0295926efcdcc1f9e13c49848e"
+           role="tabpanel" aria-labelledby="heading-8b06df0295926efcdcc1f9e13c49848e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2023/04/06/macOS-%E6%89%93%E5%BC%80txt%E4%B9%B1%E7%A0%81/" title="macOS 打开 txt 格式文件中文乱码"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">macOS 打开 txt 格式文件中文乱码</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2023/03/24/%E5%88%A0%E9%99%A4macOS%E7%9A%84Java-1-8/" title="删除macOS的Java 1.8"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">删除macOS的Java 1.8</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/06/14/%E4%BF%AE%E5%A4%8D-macOS%E4%B8%8B%E6%8F%90%E7%A4%BA%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6%E6%8D%9F%E5%9D%8F%E7%9A%84%E9%97%AE%E9%A2%98/" title="修复 macOS下提示安装软件损坏的问题"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">修复 macOS下提示安装软件损坏的问题</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2021/12/16/macOS%E7%9A%84brew%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8tab%E8%A1%A5%E5%85%A8/" title="macOS的brew无法使用tab补全"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">macOS的brew无法使用tab补全</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2021/11/16/%E5%AE%89%E8%A3%85-oh-my-zsh-%E6%8F%92%E4%BB%B6/" title="安装 oh-my-zsh 插件"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">安装 oh-my-zsh 插件</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2021/04/26/mac-OS-%E5%A4%87%E4%BB%BD%E6%8F%90%E9%80%9F/" title="macOS 备份提速"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">macOS 备份提速</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2021/02/19/macOS-%E8%99%9A%E6%8B%9F%E6%A1%8C%E9%9D%A2%E9%BB%91%E5%B1%8F/" title="macOS 虚拟桌面黑屏"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">macOS 虚拟桌面黑屏</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2020/01/24/macOS%E4%B8%8B%E9%A2%84%E8%A7%88webp%E6%A0%BC%E5%BC%8F%E7%9A%84%E5%9B%BE%E7%89%87/" title="macOS下预览webp格式的图片"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">macOS下预览webp格式的图片</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2019/12/26/%E8%A7%A3%E5%86%B3macOS%E7%AB%AF%E5%8F%A3%E8%A2%AB%E5%8D%A0%E7%94%A8/" title="解决macOS端口被占用"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">解决macOS端口被占用</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2019/07/18/%E8%A7%A3%E5%86%B3macOS%E5%A3%B0%E9%9F%B3%E7%9A%84%E9%97%AE%E9%A2%98/" title="解决macOS声音的问题"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">解决macOS声音的问题</span>
+        </a>
+      
+    
+      
+      
+        <a href="/categories/macOS/" class="list-group-item list-group-item-action">
+          <span class="category-post">More...</span>
+        </a>
+        
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="hexo教程"
+        id="heading-3a6c5b51abc2500d39835d62a52262fa" role="tab" data-toggle="collapse" href="#collapse-3a6c5b51abc2500d39835d62a52262fa"
+        aria-expanded="false"
+      >
+        hexo教程
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/hexo%E6%95%99%E7%A8%8B/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>10</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-3a6c5b51abc2500d39835d62a52262fa"
+           role="tabpanel" aria-labelledby="heading-3a6c5b51abc2500d39835d62a52262fa">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2018/08/10/%E5%BC%80%E5%90%AFsnippet%E7%9A%84%E6%9C%AC%E5%9C%B0%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD/" title="开启snippet的本地搜索功能"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">开启snippet的本地搜索功能</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2018/08/07/npm%E5%8D%87%E7%BA%A7%E6%89%80%E6%9C%89%E5%8F%AF%E6%9B%B4%E6%96%B0%E5%8C%85/" title="npm升级所有可更新包"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">npm升级所有可更新包</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/02/12/hexo%E6%95%99%E7%A8%8B-error/" title="Hexo教程 error"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hexo教程 error</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/02/11/Hexo%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E8%87%AA%E5%8A%A8%E6%89%93%E5%BC%80%E7%BC%96%E8%BE%91%E5%99%A8/" title="Hexo添加文章自动打开编辑器"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Hexo添加文章自动打开编辑器</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/05/09/%E8%B4%AD%E4%B9%B0%E5%9F%9F%E5%90%8D%E8%AE%BE%E7%BD%AEDNS/" title="购买域名设置DNS"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">购买域名设置DNS</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/05/04/hexo-%E6%95%99%E7%A8%8B4%E6%B7%BB%E5%8A%A0%E8%AF%84%E8%AE%BA%E4%BB%A3%E7%A0%81%E7%AD%89%E4%BC%98%E5%8C%96/" title="hexo 教程4:添加评论代码等优化"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hexo 教程4:添加评论代码等优化</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/04/28/hexo%E6%95%99%E7%A8%8B3%EF%BC%9A%E5%8D%9A%E5%AE%A2%E7%9A%84%E9%85%8D%E7%BD%AE%E3%80%81%E4%BD%BF%E7%94%A8/" title="hexo 教程3:博客的配置、使用"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hexo 教程3:博客的配置、使用</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/04/25/hexo%E6%95%99%E7%A8%8B2%EF%BC%9A%E6%90%AD%E5%BB%BAhexo%E5%8D%9A%E5%AE%A2/" title="hexo 教程2：搭建hexo博客"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hexo 教程2：搭建hexo博客</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/04/24/hexo-%E6%95%99%E7%A8%8B1%EF%BC%9Ahexo%E7%AE%80%E4%BB%8B/" title="hexo 教程1：hexo简介"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hexo 教程1：hexo简介</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/04/24/hexo-%E6%B7%BB%E5%8A%A0%E5%A4%9A%E8%AF%B4%E6%95%99%E7%A8%8B/" title="hexo 添加多说教程"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hexo 添加多说教程</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Study Class"
+        id="heading-241853feacd114bb9c474de5b4093c74" role="tab" data-toggle="collapse" href="#collapse-241853feacd114bb9c474de5b4093c74"
+        aria-expanded="false"
+      >
+        Study Class
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Study-Class/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>9</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-241853feacd114bb9c474de5b4093c74"
+           role="tabpanel" aria-labelledby="heading-241853feacd114bb9c474de5b4093c74">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2016/04/04/%E7%AE%97%E6%B3%95%E5%92%8C%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" title="算法和数据结构"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">算法和数据结构</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/02/19/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BBAndroid%E6%BA%90%E7%A0%81/" title="如何阅读Android源码"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">如何阅读Android源码</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/02/02/%E5%85%B3%E4%BA%8EAnroid%E7%9A%84/" title="关于Anroid的"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">关于Anroid的</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/23/%E5%A4%9C%E6%B7%B1%E5%86%99%E7%AE%97%E6%B3%95%E7%B3%BB%E5%88%97/" title="夜深写算法系列"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">夜深写算法系列</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/09/RxJava%E5%BC%80%E5%8F%91%E7%B2%BE%E8%A6%81/" title="RxJava开发精要"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">RxJava开发精要</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/08/Javva%E5%9B%9E%E8%B0%83%E6%9C%BA%E5%88%B6/" title="Java回调机制"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Java回调机制</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/05/ADB%E7%9A%84%E6%95%99%E7%A8%8B/" title="ADB的教程"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ADB的教程</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/12/30/Chrome%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/" title="Chrome插件开发入门教程"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Chrome插件开发入门教程</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/05/16/adb-shell-%E9%94%99%E8%AF%AF/" title="adb shell 错误"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">adb shell 错误</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Life"
+        id="heading-dea5251e486aed942e1bc06e1d5c116c" role="tab" data-toggle="collapse" href="#collapse-dea5251e486aed942e1bc06e1d5c116c"
+        aria-expanded="false"
+      >
+        Life
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Life/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>6</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-dea5251e486aed942e1bc06e1d5c116c"
+           role="tabpanel" aria-labelledby="heading-dea5251e486aed942e1bc06e1d5c116c">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2024/12/31/2024%E5%B9%B4%E7%9A%84%E5%A6%82%E4%BB%8A/" title="2024年的如今"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">2024年的如今</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/06/12/%E5%B0%8F%E5%AE%B6%E4%BC%99%E7%BB%88%E4%BA%8E%E5%87%BA%E6%9D%A5%E4%BA%86/" title="小家伙终于出来了"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">小家伙终于出来了</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2023/12/31/2023%E7%9A%84%E7%BB%93%E6%9D%9F/" title="2023的结束"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">2023的结束</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/12/31/2022%E5%B9%B4%E6%9C%80%E5%90%8E/" title="2022年最后"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">2022年最后</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/09/04/%E6%90%9E%E4%BA%86%E5%8F%B0%E5%8F%B0%E5%BC%8F%E6%9C%BA/" title="搞了台台式机"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">搞了台台式机</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/08/19/%E5%8D%97%E4%BA%AC%E7%A7%9F%E6%88%BF%E8%A1%A5%E8%B4%B4%E7%94%B3%E8%AF%B7%E6%B5%81%E7%A8%8B/" title="南京租房补贴申请流程"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">南京租房补贴申请流程</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Android Studio"
+        id="heading-eb0f0f0fca93c48eccbcae9e90cce428" role="tab" data-toggle="collapse" href="#collapse-eb0f0f0fca93c48eccbcae9e90cce428"
+        aria-expanded="false"
+      >
+        Android Studio
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Android-Studio/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>6</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-eb0f0f0fca93c48eccbcae9e90cce428"
+           role="tabpanel" aria-labelledby="heading-eb0f0f0fca93c48eccbcae9e90cce428">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2016/01/20/Android-Studio%E6%8F%92%E4%BB%B6/" title="Android Studio插件"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Android Studio插件</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/14/Gradle-for-Android%E7%B3%BB%E5%88%97/" title="Gradle for Android系列"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Gradle for Android系列</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/10/Android-Studio-%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/" title="Android Studio 调试技巧"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Android Studio 调试技巧</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/10/08/Android-Studio%E7%9A%84Gradle%E7%9A%84%E5%8A%A0%E9%80%9F/" title="Android Studio的Gradle的加速"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Android Studio的Gradle的加速</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/08/06/%E4%B8%BAAndroid-Studio%E5%BF%AB%E9%80%9F%E5%AE%89%E8%A3%85Gradle/" title="为Android Studio快速安装Gradle"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">为Android Studio快速安装Gradle</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/06/14/Android-Studio%E7%9A%84%E4%B8%80%E4%BA%9B%E9%94%99%E8%AF%AF/" title="Android Studio的一些错误"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Android Studio的一些错误</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Soft"
+        id="heading-682160fc6ad12f783f70608a9b46b9b9" role="tab" data-toggle="collapse" href="#collapse-682160fc6ad12f783f70608a9b46b9b9"
+        aria-expanded="false"
+      >
+        Soft
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Soft/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>6</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-682160fc6ad12f783f70608a9b46b9b9"
+           role="tabpanel" aria-labelledby="heading-682160fc6ad12f783f70608a9b46b9b9">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2017/06/04/%E4%BD%BF%E7%94%A8-Runfus-%E4%B8%BA-Windows10-%E5%88%9B%E5%BB%BA-USB-%E5%90%AF%E5%8A%A8%E7%9B%98/" title="使用 Runfus 为 Windows10 创建 USB 启动盘"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">使用 Runfus 为 Windows10 创建 USB 启动盘</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/01/20/Xshell%E9%85%8D%E8%89%B2%E6%96%B9%E6%A1%88/" title="Xshell配色方案"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Xshell配色方案</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/08/01/Xshell%E8%BF%9E%E6%8E%A5Ubuntu/" title="Xshell连接Ubuntu"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Xshell连接Ubuntu</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/04/03/Soft/" title="Soft"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Soft</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/11/09/Sublime-Text3/" title="Sublime Text3"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Sublime Text3</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/09/25/%E5%B0%8F%E5%B7%A5%E5%85%B7/" title="小工具"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">小工具</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="NAS"
+        id="heading-c07ee5debf5f3a3fef16c1ee5e8e4942" role="tab" data-toggle="collapse" href="#collapse-c07ee5debf5f3a3fef16c1ee5e8e4942"
+        aria-expanded="false"
+      >
+        NAS
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/NAS/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>6</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-c07ee5debf5f3a3fef16c1ee5e8e4942"
+           role="tabpanel" aria-labelledby="heading-c07ee5debf5f3a3fef16c1ee5e8e4942">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2026/05/26/Unraid-7-3-Internal-Boot-%E8%BF%81%E7%A7%BB%E5%AE%9E%E5%BD%95%EF%BC%9A%E4%BB%8E-NVMe-%E6%95%85%E9%9A%9C%E3%80%81Btrfs-%E9%99%8D%E7%BA%A7%EF%BC%8C%E5%88%B0-TPM-%E8%AE%B8%E5%8F%AF%E4%B8%8E-HBA-%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98/" title="Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Unraid 7.3 Internal Boot 迁移实录：从 NVMe 故障、Btrfs 降级，到 TPM 许可与 HBA 启动问题</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/01/17/unRAID%E5%AE%89%E8%A3%85Docker%E8%BF%85%E9%9B%B7%E6%8F%92%E4%BB%B6/" title="unRAID安装Docker迅雷插件"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">unRAID安装Docker迅雷插件</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/01/17/%E5%9C%A8unRAID%E4%B8%AD%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AE%89%E8%A3%85tmm%E7%9A%84Docker%E9%95%9C%E5%83%8F/" title="在unRAID中自定义安装tmm的Docker镜像"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">在unRAID中自定义安装tmm的Docker镜像</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2023/11/20/%E5%9C%A8Unraid%E4%B8%8B%EF%BC%8C%E8%BF%85%E9%9B%B7docker%E7%AD%89%E9%95%9C%E5%83%8F%E7%9A%84%E6%9D%83%E9%99%90%E9%97%AE%E9%A2%98/" title="在Unraid下，迅雷docker等镜像的权限问题"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">在Unraid下，迅雷docker等镜像的权限问题</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2023/07/18/Windows%E4%B8%8B%E8%AF%BB%E5%86%99Btrfs%E7%9A%84%E6%A0%BC%E5%BC%8F%E6%96%87%E4%BB%B6/" title="Windows下读写Btrfs的格式文件"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Windows下读写Btrfs的格式文件</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/11/30/%E4%BF%AE%E6%94%B9%E7%BE%A4%E6%99%96%E7%9A%84%E7%BD%91%E5%8D%A1%E6%95%B0%E9%87%8F/" title="修改群晖的网卡数量"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">修改群晖的网卡数量</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Apple"
+        id="heading-9f6290f4436e5a2351f12e03b6433c3c" role="tab" data-toggle="collapse" href="#collapse-9f6290f4436e5a2351f12e03b6433c3c"
+        aria-expanded="false"
+      >
+        Apple
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Apple/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>6</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-9f6290f4436e5a2351f12e03b6433c3c"
+           role="tabpanel" aria-labelledby="heading-9f6290f4436e5a2351f12e03b6433c3c">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2018/08/15/iTunes-%E6%90%9C%E7%B4%A2-API/" title="iTunes 搜索 API"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">iTunes 搜索 API</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2018/08/01/%E5%9B%BD%E5%86%85%E5%A4%96%E4%B8%BB%E6%B5%81android%E7%AC%AC%E4%B8%89%E6%96%B9%E6%9C%8D%E5%8A%A1/" title="国内外主流android第三方服务"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">国内外主流android第三方服务</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/08/16/%E9%87%8D%E7%BD%AE-MacBook-%E7%9A%84%E7%BD%91%E5%8D%A1/" title="重置 MacBook 的网卡"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">重置 MacBook 的网卡</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/06/20/install-PyQt5-for-Macbook/" title="Install PyQt5 for Macbook"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Install PyQt5 for Macbook</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/05/31/%E8%AE%A9-macbook-%E8%AF%BB%E5%8F%96-txt-%E6%96%87%E6%9C%AC/" title="让 MacBook 读取 txt 文本"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">让 MacBook 读取 txt 文本</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/02/16/iTunes%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5iPhone/" title="iTunes无法连接iPhone"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">iTunes无法连接iPhone</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Google"
+        id="heading-8b36e9207c24c76e6719268e49201d94" role="tab" data-toggle="collapse" href="#collapse-8b36e9207c24c76e6719268e49201d94"
+        aria-expanded="false"
+      >
+        Google
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Google/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>5</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-8b36e9207c24c76e6719268e49201d94"
+           role="tabpanel" aria-labelledby="heading-8b36e9207c24c76e6719268e49201d94">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2019/09/23/%E8%AE%A9Chrome%E6%98%BE%E7%A4%BAwww%E5%92%8Chttps/" title="让Chrome显示www和https"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">让Chrome显示www和https</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2019/08/22/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E7%9C%8B%E5%85%B6%E4%BB%96%E5%9B%BD%E5%AE%B6-%E5%9C%B0%E5%8C%BA%E7%9A%84Google-Play%E6%8E%92%E5%90%8D/" title="在浏览器中看其他国家/地区的Google Play排名"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">在浏览器中看其他国家/地区的Google Play排名</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2018/09/10/%E6%81%A2%E5%A4%8DChrome%E7%9A%84%E5%9C%B0%E5%9D%80%E6%A0%8Fwww/" title="恢复Chrome的地址栏www"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">恢复Chrome的地址栏www</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/10/18/Android-O%E7%9A%84%E6%84%9F%E5%8F%B9%E5%8F%B7%E6%88%96%E8%80%85%E5%8F%89-%E6%80%8E%E4%B9%88%E5%8E%BB%E6%8E%89%E5%91%A2/" title="Android O的感叹号或者叉 怎么去掉呢"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Android O的感叹号或者叉 怎么去掉呢</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/10/10/Google-play-and-something/" title="Google play and something"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Google play and something</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="HTTP"
+        id="heading-293c9ea246ff9985dc6f62a650f78986" role="tab" data-toggle="collapse" href="#collapse-293c9ea246ff9985dc6f62a650f78986"
+        aria-expanded="false"
+      >
+        HTTP
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/HTTP/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>5</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-293c9ea246ff9985dc6f62a650f78986"
+           role="tabpanel" aria-labelledby="heading-293c9ea246ff9985dc6f62a650f78986">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2017/08/08/IMEI-%E5%92%8C-IMSI-%E5%8C%BA%E5%88%AB/" title="IMEI 和 IMSI 区别"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">IMEI 和 IMSI 区别</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/08/24/HTTP%E5%9F%BA%E7%A1%80%E5%92%8C%E5%8F%98%E8%BF%81/" title="HTTP基础和变迁"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">HTTP基础和变迁</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/08/09/MUT%E5%92%8CMSS%E7%9A%84%E5%85%B3%E7%B3%BB/" title="MUT和MSS的关系"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">MUT和MSS的关系</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/08/09/HTTP%E5%8D%8F%E8%AE%AE%E4%B8%8B%E7%9A%84%E5%88%86%E6%AE%B5%E4%B8%8B%E8%BD%BD/" title="HTTP协议下的分段下载"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">HTTP协议下的分段下载</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/10/21/HTTP/" title="HTTP"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">HTTP</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Windows"
+        id="heading-aea23489ce3aa9b6406ebb28e0cda430" role="tab" data-toggle="collapse" href="#collapse-aea23489ce3aa9b6406ebb28e0cda430"
+        aria-expanded="false"
+      >
+        Windows
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Windows/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>4</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-aea23489ce3aa9b6406ebb28e0cda430"
+           role="tabpanel" aria-labelledby="heading-aea23489ce3aa9b6406ebb28e0cda430">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/11/30/%E5%A6%82%E4%BD%95%E6%9F%A5%E7%9C%8BWindows%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%85%B3%E6%9C%BA%E6%97%B6%E9%97%B4/" title="如何查看Windows系统开关机时间"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">如何查看Windows系统开关机时间</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2022/03/30/%E5%85%B3%E9%97%ADOneDrive%E7%BB%99Outlook%E9%82%AE%E7%AE%B1%E5%8F%91%E9%80%81%E5%BD%93%E5%A4%A9%E5%9B%9E%E5%BF%86%E7%9A%84%E9%82%AE%E4%BB%B6/" title="关闭OneDrive给Outlook邮箱发送当天回忆的邮件"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">关闭OneDrive给Outlook邮箱发送当天回忆的邮件</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2019/12/24/%E8%A7%A3%E5%86%B31080-%E7%AB%AF%E5%8F%A3%E8%A2%AB%E5%8D%A0%E7%94%A8/" title="解决1080 端口被占用"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">解决1080 端口被占用</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2018/12/12/Windows%E6%89%8B%E5%8A%A8%E6%B7%BB%E5%8A%A0%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8%E9%A1%B9/" title="Windows手动添加开机启动项"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Windows手动添加开机启动项</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Front-Dev"
+        id="heading-9005340102e1136d9334311122106176" role="tab" data-toggle="collapse" href="#collapse-9005340102e1136d9334311122106176"
+        aria-expanded="false"
+      >
+        Front-Dev
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Front-Dev/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>3</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-9005340102e1136d9334311122106176"
+           role="tabpanel" aria-labelledby="heading-9005340102e1136d9334311122106176">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2025/11/23/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E5%BC%80%E5%A7%8B%E4%BB%8E-RGB-%E8%BD%AC%E5%90%91-OKLCH-%E2%80%94%E2%80%94-%E9%A2%9C%E8%89%B2%E5%A4%84%E7%90%86%E7%9A%84%E6%96%B0%E9%98%B6%E6%AE%B5/" title="为什么我开始从 RGB 转向 OKLCH —— 颜色处理的新阶段"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">为什么我开始从 RGB 转向 OKLCH —— 颜色处理的新阶段</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/03/22/Content-Type%E7%9A%84%E4%B8%8D%E5%90%8C%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%8C%BA%E5%88%AB/" title="Content-Type的不同类型的区别"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Content-Type的不同类型的区别</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2024/02/03/%E4%BF%AE%E6%94%B9NPM%E9%95%9C%E5%83%8F%E6%BA%90/" title="修改NPM镜像源"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">修改NPM镜像源</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Github"
+        id="heading-e1adbcbb92c622d0b3e619f9d0730abf" role="tab" data-toggle="collapse" href="#collapse-e1adbcbb92c622d0b3e619f9d0730abf"
+        aria-expanded="false"
+      >
+        Github
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Github/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>3</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-e1adbcbb92c622d0b3e619f9d0730abf"
+           role="tabpanel" aria-labelledby="heading-e1adbcbb92c622d0b3e619f9d0730abf">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2021/11/30/GitHub%E4%B8%8D%E5%86%8D%E6%94%AF%E6%8C%81%E5%AF%86%E7%A0%81%E9%AA%8C%E8%AF%81%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="GitHub不再支持密码验证的解决方案"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">GitHub不再支持密码验证的解决方案</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/06/28/Mac%E4%BD%BF%E7%94%A8-Git%E5%92%8C-Github-%E8%BF%9E%E6%8E%A5/" title="Mac使用 Git和 Github 连接"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Mac使用 Git和 Github 连接</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/02/25/%E6%8A%8A%E8%87%AA%E5%B7%B1%E7%9A%84lib%E4%B8%8A%E4%BC%A0%E5%88%B0%E4%B8%AD%E5%A4%AE%E5%BA%93/" title="把自己的lib上传到中央库"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">把自己的lib上传到中央库</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="GIT"
+        id="heading-ed82dc1c7066f5e5103d0204b6fe58d0" role="tab" data-toggle="collapse" href="#collapse-ed82dc1c7066f5e5103d0204b6fe58d0"
+        aria-expanded="false"
+      >
+        GIT
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/GIT/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>3</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-ed82dc1c7066f5e5103d0204b6fe58d0"
+           role="tabpanel" aria-labelledby="heading-ed82dc1c7066f5e5103d0204b6fe58d0">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2016/11/10/Git%E7%A7%BB%E9%99%A4-deal%E7%AD%89%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" title="Git移除.deal等配置文件"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Git移除.deal等配置文件</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/09/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git常用命令"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Git常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2015/05/23/%E5%85%B3%E4%BA%8EGIT%E7%9A%84%E4%B8%80%E4%BA%9B%E9%94%99%E8%AF%AF/" title="关于GIT的一些错误"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">关于GIT的一些错误</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Tools"
+        id="heading-8625e1de7be14c39b1d14dc03d822497" role="tab" data-toggle="collapse" href="#collapse-8625e1de7be14c39b1d14dc03d822497"
+        aria-expanded="false"
+      >
+        Tools
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Tools/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>3</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-8625e1de7be14c39b1d14dc03d822497"
+           role="tabpanel" aria-labelledby="heading-8625e1de7be14c39b1d14dc03d822497">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2017/02/28/Ubuntu-16-04LTS-%E6%90%AD%E5%BB%BA-Shadowsocks/" title="Ubuntu 16.04LTS 搭建 Shadowsocks"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Ubuntu 16.04LTS 搭建 Shadowsocks</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/08/27/%E8%A7%A3%E5%86%B3Win10%E4%B8%8BWIFI%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E5%88%B0%E7%BD%91%E7%BB%9C/" title="解决Win10下WIFI无法连接到网络"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">解决Win10下WIFI无法连接到网络</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/06/24/VMware%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80/" title="VMware无法打开"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">VMware无法打开</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="DEV"
+        id="heading-bfeddf560ff988c07141df6135a9bfcf" role="tab" data-toggle="collapse" href="#collapse-bfeddf560ff988c07141df6135a9bfcf"
+        aria-expanded="false"
+      >
+        DEV
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/DEV/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>2</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-bfeddf560ff988c07141df6135a9bfcf"
+           role="tabpanel" aria-labelledby="heading-bfeddf560ff988c07141df6135a9bfcf">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2025/03/18/Docker-%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E5%A4%B1%E8%B4%A5/" title="Docker 镜像拉取失败"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Docker 镜像拉取失败</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/11/30/%E6%8A%8ASQL%E7%9A%84%E6%98%BE%E7%A4%BA%E7%BB%93%E6%9E%9C%E8%BE%93%E5%87%BA%E5%88%B0%E6%96%87%E6%9C%AC%E4%B8%AD/" title="把SQL的显示结果输出到文本中"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">把SQL的显示结果输出到文本中</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Java"
+        id="heading-d52387880e1ea22817a72d3759213819" role="tab" data-toggle="collapse" href="#collapse-d52387880e1ea22817a72d3759213819"
+        aria-expanded="false"
+      >
+        Java
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Java/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>2</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-d52387880e1ea22817a72d3759213819"
+           role="tabpanel" aria-labelledby="heading-d52387880e1ea22817a72d3759213819">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2017/08/18/%E5%8D%B8%E8%BD%BD-JDK-for-Mac/" title="卸载 JDK for Mac"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">卸载 JDK for Mac</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2016/01/27/Java-HashMap%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/" title="Java HashMap工作原理及实现"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Java HashMap工作原理及实现</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="WeiXin"
+        id="heading-ca4f1b340dc6de98809b0628b2ae3db5" role="tab" data-toggle="collapse" href="#collapse-ca4f1b340dc6de98809b0628b2ae3db5"
+        aria-expanded="false"
+      >
+        WeiXin
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/WeiXin/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>2</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-ca4f1b340dc6de98809b0628b2ae3db5"
+           role="tabpanel" aria-labelledby="heading-ca4f1b340dc6de98809b0628b2ae3db5">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2023/06/28/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E7%BB%84%E4%BB%B6vant%E7%9A%84van-datetime-picker%E6%8A%A5%E9%94%99/" title="微信小程序组件vant的van-datetime-picker报错"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">微信小程序组件vant的van-datetime-picker报错</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2018/04/16/%E8%8E%B7%E5%8F%96%E5%B0%8F%E7%A8%8B%E5%BA%8F%E7%9A%84openid%E4%B8%8Eunionid/" title="获取小程序的openid与unionid"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">获取小程序的openid与unionid</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Regex"
+        id="heading-86f600672d32a7be1dd6cb035ac61577" role="tab" data-toggle="collapse" href="#collapse-86f600672d32a7be1dd6cb035ac61577"
+        aria-expanded="false"
+      >
+        Regex
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Regex/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>2</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-86f600672d32a7be1dd6cb035ac61577"
+           role="tabpanel" aria-labelledby="heading-86f600672d32a7be1dd6cb035ac61577">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2022/04/26/%E9%83%A8%E5%88%86%E5%9B%BD%E5%AE%B6%E5%92%8C%E5%9C%B0%E5%8C%BA%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%AD%A3%E5%88%99%E5%8C%B9%E9%85%8D%E8%A1%A8%E8%BE%BE%E5%BC%8F/" title="部分国家和地区的手机号正则匹配表达式"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">部分国家和地区的手机号正则匹配表达式</span>
+        </a>
+      
+    
+      
+      
+        <a href="/2017/10/18/%E6%9C%80%E6%96%B0%E6%89%8B%E6%9C%BA%E5%8F%B7%E7%A0%81%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" title="最新手机号码正则表达式"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">最新手机号码正则表达式</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Xposed"
+        id="heading-047719ddfab4b2b122684f10093a2155" role="tab" data-toggle="collapse" href="#collapse-047719ddfab4b2b122684f10093a2155"
+        aria-expanded="false"
+      >
+        Xposed
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Xposed/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>1</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-047719ddfab4b2b122684f10093a2155"
+           role="tabpanel" aria-labelledby="heading-047719ddfab4b2b122684f10093a2155">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2016/08/25/Xposed-is-installed-but-not-actived/" title="Xposed is installed but not actived"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Xposed is installed but not actived</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Photos"
+        id="heading-5daaf223b01f8f3e1bd9287170826fbc" role="tab" data-toggle="collapse" href="#collapse-5daaf223b01f8f3e1bd9287170826fbc"
+        aria-expanded="false"
+      >
+        Photos
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Photos/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>1</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-5daaf223b01f8f3e1bd9287170826fbc"
+           role="tabpanel" aria-labelledby="heading-5daaf223b01f8f3e1bd9287170826fbc">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2025/09/30/exiftool-%E4%BD%BF%E7%94%A8/" title="使用 ExifTool 为照片批量添加和复制 GPS 信息"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">使用 ExifTool 为照片批量添加和复制 GPS 信息</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="GitHub"
+        id="heading-d3b7c913cd04ebfec0e9ec32cb6fd58c" role="tab" data-toggle="collapse" href="#collapse-d3b7c913cd04ebfec0e9ec32cb6fd58c"
+        aria-expanded="false"
+      >
+        GitHub
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/GitHub/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>1</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-d3b7c913cd04ebfec0e9ec32cb6fd58c"
+           role="tabpanel" aria-labelledby="heading-d3b7c913cd04ebfec0e9ec32cb6fd58c">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2026/02/09/%E4%B8%80%E6%AC%A1%E3%80%8Ccargo-%E7%AA%81%E7%84%B6%E6%B6%88%E5%A4%B1%E3%80%8D%E4%B9%8B%E5%90%8E%EF%BC%9A%E8%81%8A%E8%81%8A-GitHub-Actions-%E6%9C%AC%E6%9C%BA-self-hosted-runner-%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%89%93%E5%BC%80%E6%96%B9%E5%BC%8F/" title="一次「cargo 突然消失」之后：聊聊 GitHub Actions + 本机 self-hosted runner 的正确打开方式"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">一次「cargo 突然消失」之后：聊聊 GitHub Actions + 本机 self-hosted runner 的正确打开方式</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Cloudflare"
+        id="heading-3f07179a07b2a7661e37a3fd0e652a07" role="tab" data-toggle="collapse" href="#collapse-3f07179a07b2a7661e37a3fd0e652a07"
+        aria-expanded="false"
+      >
+        Cloudflare
+        <span class="list-group-count"></span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+        <a href="/categories/Cloudflare/" class="category-count col-2 col-md-1 col-xm-1">
+          <i class="iconfont icon-articles"></i>
+          <span>1</span>
+        </a>
+      
+      <div class="category-collapse collapse " id="collapse-3f07179a07b2a7661e37a3fd0e652a07"
+           role="tabpanel" aria-labelledby="heading-3f07179a07b2a7661e37a3fd0e652a07">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/2026/01/29/%E4%BD%BF%E7%94%A8-Cloudflare-R2-Workers-%E6%9E%84%E5%BB%BA%E7%A8%B3%E5%AE%9A%E3%80%81%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E8%BD%AF%E4%BB%B6%E4%B8%8B%E8%BD%BD%E5%88%86%E5%8F%91/" title="使用 Cloudflare R2 + Workers 构建稳定、高性能的软件下载分发"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">使用 Cloudflare R2 + Workers 构建稳定、高性能的软件下载分发</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  <script defer src="/js/openkounter.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
 
 
 
 
 
-<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
 
 
+  
 
-	
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
 </body>
-
 </html>
