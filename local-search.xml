@@ -4986,11 +4986,11 @@
   
   
   <entry>
-    <title>about me</title>
+    <title>关于我</title>
     <link href="/"/>
     <url>/</url>
     
-    <content type="html"><![CDATA[<p>####<center><b>id: yuluo</b></center><br>####<center>Email: luoshatter#gmail.com</b></center><br>####<center>Github:<a href="https://github.com/yuluo-ding">https://github.com/yuluo-ding</a></b></center></p>]]></content>
+    <content type="html"><![CDATA[<h2 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h2><p>我是 yuluo，长期记录 Python、Linux、macOS、Android、Git、NAS 等技术笔记与开发实践。</p><p>这个博客主要用于沉淀日常遇到的问题、排查过程、工具使用经验和一些阶段性的想法。</p><h2 id="信息"><a href="#信息" class="headerlink" title="信息"></a>信息</h2><ul><li>ID: yuluo</li><li>位置: Earth</li><li>邮箱: luoshatter#gmail.com</li><li>GitHub: <a href="https://github.com/yuluod">yuluod</a></li><li>RSS: <a href="/atom.xml">订阅</a></li></ul>]]></content>
     
   </entry>
   
